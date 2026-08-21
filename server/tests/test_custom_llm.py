@@ -20,7 +20,7 @@ def test_notion_tool_is_always_available(fake_env):
         messages=[{"role": "user", "content": "Add a task"}]
     )
     names = [tool["function"]["name"] for tool in custom_llm._tools_for_request(request)]
-    assert names == ["create_notion_task"]
+    assert names == ["create_task"]
 
 
 def test_completion_options_forward_provider_thinking_mode(fake_env, monkeypatch):
@@ -61,7 +61,7 @@ def test_execute_tool_passes_context_and_call_id(fake_env, monkeypatch):
                     "id": "call-7",
                     "type": "function",
                     "function": {
-                        "name": "create_notion_task",
+                        "name": "create_task",
                         "arguments": '{"title":"Ship demo"}',
                     },
                 }
@@ -78,3 +78,25 @@ def test_execute_tool_passes_context_and_call_id(fake_env, monkeypatch):
     }
     assert results[0]["role"] == "tool"
     assert results[0]["tool_call_id"] == "call-7"
+
+
+def test_legacy_notion_tool_name_remains_executable(fake_env, monkeypatch):
+    async def fake_tool(*args):
+        return json.dumps({"ok": True})
+
+    monkeypatch.setattr(custom_llm.notion_tasks, "create_task_tool", fake_tool)
+    results = asyncio.run(
+        custom_llm._execute_tools(
+            [
+                {
+                    "id": "legacy-call",
+                    "function": {
+                        "name": "create_notion_task",
+                        "arguments": '{"title":"Legacy task"}',
+                    },
+                }
+            ],
+            {},
+        )
+    )
+    assert json.loads(results[0]["content"])["ok"] is True

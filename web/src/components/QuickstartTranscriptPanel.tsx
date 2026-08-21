@@ -66,7 +66,7 @@ export function QuickstartTranscriptPanel({
 				) : (
 					messages.map((message, index) => {
 						const isAgent = String(message.uid) === agentUID;
-						const label = isAgent ? "J.A.R.V.I.S." : "Operator";
+						const label = isAgent ? "JARVIS" : "Operator";
 						const text = message.text?.trim();
 						const time = formatMessageTime(message.createdAt);
 

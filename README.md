@@ -1,6 +1,6 @@
-# J.A.R.V.I.S. Voice Task Agent
+# JARVIS Voice AI Assistant
 
-An English voice assistant that turns spoken requests into real Notion tasks. The demo uses Agora Conversational AI for the real-time voice session, a Python OpenAI-compatible tool loop for task execution, and a Next.js control surface.
+An English voice assistant for natural conversation and useful actions. The demo uses Agora Conversational AI for the real-time voice session, a Python OpenAI-compatible tool loop, a Notion task capability, and a Next.js control surface.
 
 ## Stack
 
@@ -74,7 +74,7 @@ Deploy `web/` to Vercel with `AGENT_BACKEND_URL=https://<railway-domain>`.
 
 1. The browser joins Agora RTC/RTM and asks FastAPI to start an agent.
 2. Agora streams recognized speech to the private OpenAI-compatible endpoint.
-3. The model calls `create_notion_task` when the user requests a task.
+3. The model calls the provider-neutral `create_task` tool when the user requests a task.
 4. FastAPI creates the Notion page and returns a truthful success or failure result.
 5. The assistant speaks the result and the UI displays the recent task with its Notion URL.
 

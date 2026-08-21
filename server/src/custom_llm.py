@@ -19,12 +19,12 @@ from notion_service import notion_tasks
 logger = logging.getLogger("uvicorn.error")
 router = APIRouter()
 
-CREATE_NOTION_TASK_TOOL = {
+CREATE_TASK_TOOL = {
     "type": "function",
     "function": {
-        "name": "create_notion_task",
+        "name": "create_task",
         "description": (
-            "Create a real task in the user's configured Notion task data source. "
+            "Create a real task in the user's connected task service. "
             "Use this whenever the user asks to add, save, remember, or create a task."
         ),
         "parameters": {
@@ -86,8 +86,8 @@ def _tools_for_request(request: ChatCompletionRequest) -> list[dict[str, Any]]:
         for tool in tools
         if isinstance(tool, dict)
     }
-    if "create_notion_task" not in names:
-        tools.append(CREATE_NOTION_TASK_TOOL)
+    if "create_task" not in names:
+        tools.append(CREATE_TASK_TOOL)
     return tools
 
 
@@ -124,7 +124,7 @@ async def _execute_tools(
         except json.JSONDecodeError:
             arguments = {}
 
-        if name == "create_notion_task":
+        if name in {"create_task", "create_notion_task"}:
             content = await notion_tasks.create_task_tool(
                 str(context.get("appId", "")),
                 str(context.get("userId", "")),

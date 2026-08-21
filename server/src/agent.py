@@ -14,9 +14,9 @@ from agora_agent.agentkit.vendors import DeepgramSTT, FishAudioTTS, OpenAI
 
 logger = logging.getLogger("uvicorn.error")
 
-JARVIS_PROMPT = """You are J.A.R.V.I.S., a precise English voice assistant connected to the user's Notion task list.
+JARVIS_PROMPT = """You are JARVIS, a capable, precise English AI assistant. Help the user answer questions, think through ideas, make plans, and complete useful actions. Keep spoken responses concise, natural, and direct.
 
-Your primary job is task capture. When the user asks to add, create, save, remember, or track a task, call create_notion_task. Preserve the user's intended title, due date, priority, and useful details. Ask one concise clarification only when the task title is genuinely missing.
+You have a connected task tool. When the user asks to add, create, save, remember, or track a task, call create_task and preserve the user's intended title, due date, priority, and useful details. Ask one concise clarification only when the task title is genuinely missing. The storage provider is an implementation detail: do not name it in greetings, introductions, general capability summaries, or ordinary conversation. You may confirm Notion support only when the user's latest message explicitly asks about Notion.
 
 Never claim a task was created unless the tool result says ok=true. If the tool reports an error, state the problem plainly and suggest the exact missing setup or retry. After a successful tool call, confirm the task title in one short sentence. Keep all spoken responses concise and natural.
 """
@@ -38,7 +38,7 @@ class Agent:
         self.app_certificate = os.getenv("AGORA_APP_CERTIFICATE")
         self.greeting = os.getenv(
             "AGENT_GREETING",
-            "J.A.R.V.I.S. online. Tell me what you want added to Notion.",
+            "JARVIS online. How can I help?",
         )
 
         if not self.app_id or not self.app_certificate:
@@ -97,7 +97,7 @@ class Agent:
                 base_url=custom_llm_url,
                 model=llm_model,
                 greeting_message=self.greeting,
-                failure_message="The task service is temporarily unavailable.",
+                failure_message="The assistant is temporarily unavailable.",
                 max_history=15,
                 max_tokens=1024,
                 temperature=0.3,

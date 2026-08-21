@@ -25,6 +25,9 @@ def test_agent_constructs_with_full_env(fake_env):
     instance = agent.Agent()
     assert instance.app_id == "0123456789abcdef0123456789abcdef"
     assert instance.client is not None
+    assert instance.greeting == "JARVIS online. How can I help?"
+    assert agent.JARVIS_PROMPT.startswith("You are JARVIS")
+    assert "The storage provider is an implementation detail" in agent.JARVIS_PROMPT
 
 
 def test_start_wires_managed_openai_and_returns_shape(fake_env, monkeypatch):

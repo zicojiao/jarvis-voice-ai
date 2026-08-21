@@ -1,4 +1,4 @@
-# J.A.R.V.I.S. Voice Task Agent — Architecture
+# JARVIS Voice AI Assistant — Architecture
 
 ## Topology
 
@@ -22,7 +22,7 @@ FastAPI owns all secrets, Agora session creation, the OpenAI-compatible streamin
 1. `GET /api/get_config` returns short-lived Agora RTC/RTM connection data.
 2. The browser joins the channel and calls `POST /api/startAgent`.
 3. The agent uses `CUSTOM_LLM_URL` as its LLM endpoint and authenticates with `CUSTOM_LLM_PROXY_KEY`.
-4. The custom LLM streams model output and executes `create_notion_task` when requested.
+4. The custom LLM streams model output and executes the provider-neutral `create_task` tool when requested.
 5. `NotionTaskService` creates a page under `NOTION_DATA_SOURCE_ID` using Notion API version `2025-09-03`.
 6. The result is spoken over Agora and exposed by `GET /api/tasks/recent` for the UI.
    Speech synthesis uses Fish Audio voice model `7c1a7dc37829497593ab4db29eed387c`.

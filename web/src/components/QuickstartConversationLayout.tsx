@@ -30,7 +30,7 @@ export function QuickstartConversationLayout({
 					<div className="jarvis-monogram" aria-hidden="true">J</div>
 					<div className="flex min-w-0 flex-col justify-center gap-1">
 						<span className="truncate text-lg font-semibold leading-none tracking-[0.18em] text-foreground">
-							J.A.R.V.I.S.
+							JARVIS
 						</span>
 						{pipelineMetrics}
 					</div>

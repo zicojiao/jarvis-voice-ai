@@ -15,9 +15,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-	title: "J.A.R.V.I.S. Voice Task Agent | Agora",
+	title: "JARVIS AI Assistant | Agora",
 	description:
-		"A real-time Agora Conversational AI demo that turns voice commands into Notion tasks.",
+		"A real-time voice AI assistant powered by Agora with connected tools for taking action.",
 	icons: {
 		icon: [
 			{ url: "/favicon.ico" },

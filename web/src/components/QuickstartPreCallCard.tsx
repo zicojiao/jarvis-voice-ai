@@ -18,11 +18,11 @@ export function QuickstartPreCallCard({
 	return (
 		<div className="jarvis-launch-grid mx-auto w-[min(94vw,68rem)] animate-fade-up text-left">
 			<div className="jarvis-launch-copy">
-				<div className="jarvis-eyebrow"><span /> J.A.R.V.I.S. voice task interface</div>
-				<p className="jarvis-serial">AGORA RTC · FISH AUDIO · NOTION</p>
-				<h1>Speak it.<br /><em>It&apos;s in Notion.</em></h1>
+				<div className="jarvis-eyebrow"><span /> JARVIS voice interface</div>
+				<p className="jarvis-serial">AGORA RTC · FISH AUDIO · CONNECTED TOOLS</p>
+				<h1>Ask anything.<br /><em>Take action.</em></h1>
 				<p className="jarvis-intro">
-					Give J.A.R.V.I.S. an instruction. It creates the task, files it in Notion, and reports back without breaking the conversation.
+					Talk to JARVIS naturally. Ask a question, work through an idea, or have it take action with connected tools when needed.
 				</p>
 
 				<Button
@@ -49,8 +49,8 @@ export function QuickstartPreCallCard({
 
 			<div className="jarvis-capabilities">
 				<div><Radio /><span><strong>Real-time voice</strong><small>Agora RTC + RTM</small></span></div>
-				<div><Sparkles /><span><strong>Agent reasoning</strong><small>OpenAI tool calling</small></span></div>
-				<div><Database /><span><strong>Live execution</strong><small>Notion REST API</small></span></div>
+				<div><Sparkles /><span><strong>AI assistant</strong><small>Fast, conversational reasoning</small></span></div>
+				<div><Database /><span><strong>Connected tools</strong><small>Actions available on demand</small></span></div>
 			</div>
 		</div>
 	);

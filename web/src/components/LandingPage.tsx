@@ -238,7 +238,7 @@ export default function LandingPage() {
 			</div>
 
 			{!showConversation ? (
-				<footer className="jarvis-footer"><span>J.A.R.V.I.S. PROTOTYPE</span><a href="https://agora.io/en/" target="_blank" rel="noreferrer">Powered by Agora</a></footer>
+				<footer className="jarvis-footer"><span>JARVIS PROTOTYPE</span><a href="https://agora.io/en/" target="_blank" rel="noreferrer">Powered by Agora</a></footer>
 			) : null}
 		</div>
 	);
