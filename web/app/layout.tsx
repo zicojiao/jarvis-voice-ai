@@ -15,9 +15,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-	title: "Talk to a voice agent now | Agora",
+	title: "J.A.R.V.I.S. Voice Task Agent | Agora",
 	description:
-		"Python + FastAPI quickstart: real-time voice agent with live transcript, streaming audio, and low latency from Agora's Conversational AI Engine—FastAPI service you can fork, extend, and ship.",
+		"A real-time Agora Conversational AI demo that turns voice commands into Notion tasks.",
 	icons: {
 		icon: [
 			{ url: "/favicon.ico" },

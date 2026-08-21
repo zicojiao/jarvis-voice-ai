@@ -45,13 +45,13 @@ export function QuickstartTranscriptPanel({
 
 	return (
 		<section
-			className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl border border-border bg-card/20"
+			className="jarvis-panel flex h-full min-h-0 w-full flex-col overflow-hidden"
 			aria-label="Transcription panel"
 		>
-			<div className="flex h-14 shrink-0 items-center justify-between border-b border-border px-4">
+			<div className="jarvis-panel-header">
 				<div>
-					<h2 className="text-sm font-semibold text-foreground">Transcript</h2>
-					<p className="text-xs text-muted-foreground">Live voice turns</p>
+					<p className="jarvis-kicker">Audio channel</p>
+					<h2>Live transcript</h2>
 				</div>
 			</div>
 
@@ -60,13 +60,13 @@ export function QuickstartTranscriptPanel({
 				className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 py-4"
 			>
 				{messages.length === 0 ? (
-					<div className="flex h-full items-center justify-center text-center text-sm text-muted-foreground">
+					<div className="jarvis-empty h-full">
 						Start speaking to see the live transcript here.
 					</div>
 				) : (
 					messages.map((message, index) => {
 						const isAgent = String(message.uid) === agentUID;
-						const label = isAgent ? "Agent" : "You";
+						const label = isAgent ? "J.A.R.V.I.S." : "Operator";
 						const text = message.text?.trim();
 						const time = formatMessageTime(message.createdAt);
 
@@ -80,10 +80,10 @@ export function QuickstartTranscriptPanel({
 									{time ? <span className="font-normal">{time}</span> : null}
 								</div>
 								<div
-									className={`max-w-full whitespace-pre-wrap rounded-xl border px-3 py-2 text-sm leading-6 ${
+									className={`max-w-full whitespace-pre-wrap border px-3 py-2 text-sm leading-6 ${
 										isAgent
-											? "border-[#2f2f2f] bg-[#212121] text-[#e7e7e7]"
-											: "border-[#d7d7d7] bg-[#fdfcfb] text-black"
+											? "border-primary/20 bg-primary/5 text-[#d9f7f8]"
+											: "border-white/10 bg-white/[0.035] text-[#d7e0e5]"
 									}`}
 								>
 									{text || "..."}

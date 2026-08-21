@@ -58,6 +58,8 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - `web/src/services/api.ts`: browser API client.
 - `server/src/server.py`: FastAPI entrypoints.
 - `server/src/agent.py`: async Agora agent lifecycle wrapper.
+- `server/src/custom_llm.py`: OpenAI-compatible streaming proxy and tool loop.
+- `server/src/notion_service.py`: Notion API task writer and recent-task feed.
 
 ## Patterns
 
@@ -66,6 +68,8 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - Keep RTC client creation StrictMode-safe.
 - Keep transcript speaker mapping based on actual UIDs, not heuristics.
 - Keep managed-provider defaults unless a change intentionally adds a custom provider path.
+- Keep OpenAI and Notion credentials server-only. Agora receives only the separate custom-LLM proxy key.
+- Preserve `create_notion_task` idempotency so streamed tool retries cannot create duplicate pages.
 
 ## Working Rules
 

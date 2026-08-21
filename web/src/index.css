@@ -2,178 +2,151 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Light theme (default). Dark tokens apply when the OS prefers dark mode. */
 :root {
-	color-scheme: light;
-
-	--background: 220 20% 98%;
-	--surface: 220 18% 96%;
-	--surface-elevated: 220 16% 94%;
-
-	--card: 0 0% 100%;
-	--card-foreground: 220 25% 12%;
-	--popover: 0 0% 100%;
-	--popover-foreground: 220 25% 12%;
-	--muted: 220 14% 94%;
-
-	--border: 220 13% 88%;
-	--input: 220 13% 88%;
-
-	--foreground: 220 25% 12%;
-	--muted-foreground: 220 10% 42%;
-
-	--primary: 194 100% 42%;
-	--primary-foreground: 220 25% 12%;
-
-	--secondary: 220 14% 94%;
-	--secondary-foreground: 220 25% 12%;
-
-	--accent: 194 100% 42%;
-	--accent-foreground: 220 25% 12%;
-
-	--destructive: 0 72% 52%;
+	color-scheme: dark;
+	--background: 202 47% 4%;
+	--surface: 200 38% 7%;
+	--surface-elevated: 198 32% 10%;
+	--card: 199 35% 7%;
+	--card-foreground: 190 32% 91%;
+	--popover: 199 35% 7%;
+	--popover-foreground: 190 32% 91%;
+	--muted: 199 25% 11%;
+	--border: 194 26% 17%;
+	--input: 194 26% 17%;
+	--foreground: 190 32% 91%;
+	--muted-foreground: 196 13% 53%;
+	--primary: 184 65% 53%;
+	--primary-foreground: 202 47% 4%;
+	--secondary: 199 25% 11%;
+	--secondary-foreground: 190 32% 91%;
+	--accent: 36 93% 62%;
+	--accent-foreground: 202 47% 4%;
+	--destructive: 2 78% 62%;
 	--destructive-foreground: 0 0% 100%;
-
-	--ring: 194 100% 42%;
-	--radius: 0.5rem;
-
-	--chart-1: 194 100% 42%;
-	--chart-2: 220 10% 45%;
-	--chart-3: 220 10% 35%;
-	--chart-4: 0 72% 52%;
-	--chart-5: 150 50% 40%;
-
-	--sidebar-background: 0 0% 100%;
-	--sidebar-foreground: 220 25% 12%;
-	--sidebar-primary: 194 100% 42%;
-	--sidebar-primary-foreground: 220 25% 12%;
-	--sidebar-accent: 220 14% 94%;
-	--sidebar-accent-foreground: 220 25% 12%;
-	--sidebar-border: 220 13% 88%;
-	--sidebar-ring: 194 100% 42%;
-
-	--viz-stop-1: 225 92% 50%;
-	--viz-stop-2: 220 14% 78%;
-	--viz-stop-3: 285 58% 48%;
-
-	--font-sans: var(--font-instrument-sans), system-ui, -apple-system,
-		BlinkMacSystemFont, "Segoe UI", sans-serif;
+	--ring: 184 65% 53%;
+	--radius: 0.25rem;
+	--viz-stop-1: 184 78% 55%;
+	--viz-stop-2: 196 64% 70%;
+	--viz-stop-3: 36 88% 62%;
+	--font-sans: var(--font-instrument-sans), system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-	:root {
-		color-scheme: dark;
-
-		--background: 220 14% 5%;
-		--surface: 220 12% 9%;
-		--surface-elevated: 220 10% 13%;
-
-		--card: 220 12% 9%;
-		--card-foreground: 220 15% 95%;
-		--popover: 220 10% 13%;
-		--popover-foreground: 220 15% 95%;
-		--muted: 220 12% 9%;
-
-		--border: 220 10% 18%;
-		--input: 220 10% 18%;
-
-		--foreground: 220 15% 95%;
-		--muted-foreground: 220 10% 50%;
-
-		--primary: 194 100% 50%;
-		--primary-foreground: 220 14% 5%;
-
-		--secondary: 220 10% 13%;
-		--secondary-foreground: 220 15% 95%;
-
-		--accent: 194 100% 50%;
-		--accent-foreground: 220 14% 5%;
-
-		--destructive: 0 72% 58%;
-		--destructive-foreground: 0 0% 100%;
-
-		--ring: 194 100% 50%;
-
-		--chart-1: 194 100% 50%;
-		--chart-2: 220 10% 60%;
-		--chart-3: 220 10% 40%;
-		--chart-4: 0 72% 58%;
-		--chart-5: 150 60% 45%;
-
-		--sidebar-background: 220 12% 9%;
-		--sidebar-foreground: 220 15% 95%;
-		--sidebar-primary: 194 100% 50%;
-		--sidebar-primary-foreground: 220 14% 5%;
-		--sidebar-accent: 220 10% 13%;
-		--sidebar-accent-foreground: 220 15% 95%;
-		--sidebar-border: 220 10% 18%;
-		--sidebar-ring: 194 100% 50%;
-
-		--viz-stop-1: 194 100% 58%;
-		--viz-stop-2: 215 42% 72%;
-		--viz-stop-3: 272 62% 72%;
-	}
-}
+* { box-sizing: border-box; }
 
 body {
+	margin: 0;
 	font-family: var(--font-sans);
 	color: hsl(var(--foreground));
-	background-color: hsl(var(--background));
+	background: #030b0f;
 }
 
-@keyframes fade-up {
-	from {
-		opacity: 0;
-		transform: translateY(8px);
-	}
+button, a { -webkit-tap-highlight-color: transparent; }
 
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
+.jarvis-app {
+	background:
+		radial-gradient(circle at 67% 49%, rgba(54, 202, 214, 0.09), transparent 28rem),
+		linear-gradient(rgba(42, 117, 125, 0.055) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(42, 117, 125, 0.055) 1px, transparent 1px),
+		#030b0f;
+	background-size: auto, 56px 56px, 56px 56px, auto;
 }
 
-.animate-fade-up {
-	animation: fade-up 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+.jarvis-app::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background: linear-gradient(180deg, rgba(255,255,255,.015), transparent 20%, transparent 80%, rgba(0,0,0,.22));
+	mix-blend-mode: screen;
 }
 
-.animate-fade-up-d1 {
-	animation-delay: 60ms;
+.jarvis-launch-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1.08fr) minmax(18rem, .8fr);
+	grid-template-rows: 1fr auto;
+	gap: 1.25rem 4.5rem;
+	align-items: center;
+	padding: 3rem;
 }
 
-.animate-fade-up-d2 {
-	animation-delay: 120ms;
+.jarvis-launch-copy { position: relative; z-index: 2; }
+.jarvis-eyebrow, .jarvis-serial, .jarvis-kicker {
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	text-transform: uppercase;
+	letter-spacing: .19em;
+}
+.jarvis-eyebrow { display: flex; align-items: center; gap: .7rem; color: #8faeb3; font-size: .68rem; font-weight: 700; }
+.jarvis-eyebrow span { width: 2.2rem; height: 1px; background: #36cad6; box-shadow: 0 0 10px #36cad6; }
+.jarvis-serial { margin-top: 2.5rem; color: #f2ad4e; font-size: .62rem; }
+.jarvis-launch-copy h1 { margin: .7rem 0 1.2rem; max-width: 38rem; font-size: clamp(3.5rem, 7.5vw, 7.2rem); font-weight: 520; line-height: .82; letter-spacing: -.072em; }
+.jarvis-launch-copy h1 em { color: #36cad6; font-style: normal; font-weight: 360; }
+.jarvis-intro { max-width: 34rem; color: #91a5aa; font-size: 1rem; line-height: 1.75; }
+.jarvis-example { margin-top: 2.2rem; padding-left: 1rem; border-left: 2px solid rgba(54,202,214,.45); display: flex; flex-direction: column; gap: .32rem; }
+.jarvis-example span { color: #667d82; font: 600 .62rem/1 ui-monospace, monospace; letter-spacing: .15em; text-transform: uppercase; }
+.jarvis-example strong { color: #dbe8ea; font-size: .9rem; font-weight: 520; }
+.jarvis-launch-button { border: 1px solid #36cad6 !important; background: #36cad6 !important; color: #031014 !important; box-shadow: 0 0 0 rgba(54,202,214,0); transition: transform .2s ease, box-shadow .2s ease, background .2s ease !important; }
+.jarvis-launch-button:hover { transform: translateY(-2px); background: #7be3ea !important; box-shadow: 0 0 36px rgba(54,202,214,.25); }
+
+.jarvis-core { position: relative; width: min(34vw, 24rem); aspect-ratio: 1; justify-self: center; display: grid; place-items: center; }
+.jarvis-core::before, .jarvis-core::after { content: ""; position: absolute; inset: -12%; border: 1px solid rgba(54,202,214,.12); border-radius: 50%; }
+.jarvis-core::after { inset: 9%; border-style: dashed; animation: spin 24s linear infinite reverse; }
+.jarvis-core-ring { position: absolute; border-radius: 50%; border: 1px solid rgba(54,202,214,.42); }
+.jarvis-core .ring-a { inset: 0; border-style: dashed; animation: spin 32s linear infinite; }
+.jarvis-core .ring-b { inset: 16%; border-width: 2px; border-color: rgba(54,202,214,.22); box-shadow: inset 0 0 48px rgba(54,202,214,.07), 0 0 34px rgba(54,202,214,.08); animation: pulse-ring 3.2s ease-in-out infinite; }
+.jarvis-core .ring-c { inset: 30%; border-color: rgba(242,173,78,.52); border-left-color: transparent; border-right-color: transparent; animation: spin 7s linear infinite reverse; }
+.jarvis-core-center { width: 28%; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #36cad6; border-radius: 50%; background: radial-gradient(circle, rgba(54,202,214,.22), rgba(3,11,15,.92) 67%); box-shadow: 0 0 42px rgba(54,202,214,.22); }
+.jarvis-core-center span { font-size: 2.6rem; font-weight: 260; line-height: 1; }
+.jarvis-core-center small { margin-top: .35rem; color: #36cad6; font: 600 .46rem/1 ui-monospace, monospace; letter-spacing: .2em; }
+
+.jarvis-capabilities { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 1.5rem; border: 1px solid rgba(54,202,214,.12); background: rgba(54,202,214,.12); }
+.jarvis-capabilities > div { display: flex; align-items: center; gap: .9rem; padding: 1rem 1.1rem; background: rgba(3,11,15,.92); }
+.jarvis-capabilities svg { width: 1.05rem; color: #36cad6; }
+.jarvis-capabilities span { display: flex; flex-direction: column; }
+.jarvis-capabilities strong { font-size: .76rem; font-weight: 650; letter-spacing: .02em; }
+.jarvis-capabilities small { margin-top: .2rem; color: #60777c; font: .58rem/1 ui-monospace, monospace; text-transform: uppercase; letter-spacing: .1em; }
+.jarvis-footer { position: fixed; inset-inline: 0; bottom: 0; display: flex; justify-content: space-between; padding: 1.1rem 1.5rem; color: #4f676c; font: 600 .56rem/1 ui-monospace, monospace; letter-spacing: .16em; }
+.jarvis-footer a { color: #789096; text-decoration: none; }
+
+.jarvis-shell { background: rgba(3, 11, 15, .82); }
+.jarvis-command-bar { border-bottom: 1px solid rgba(54,202,214,.15); background: linear-gradient(90deg, rgba(54,202,214,.04), transparent 48%); }
+.jarvis-monogram { display: grid; width: 2.5rem; height: 2.5rem; place-items: center; border: 1px solid rgba(54,202,214,.55); color: #36cad6; font-size: 1.3rem; font-weight: 260; box-shadow: inset 0 0 20px rgba(54,202,214,.08); }
+.jarvis-main { position: relative; border: 1px solid rgba(54,202,214,.1); background: radial-gradient(circle at 50% 47%, rgba(54,202,214,.06), transparent 45%); }
+.jarvis-main::before { content: "VOICE INTERFACE // ACTIVE"; position: absolute; left: 1rem; top: .9rem; color: #526c70; font: 600 .52rem/1 ui-monospace, monospace; letter-spacing: .16em; }
+.jarvis-panel { border: 1px solid rgba(54,202,214,.14); background: rgba(5,18,23,.7); }
+.jarvis-panel-header { display: flex; min-height: 3.6rem; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(54,202,214,.12); padding: .7rem 1rem; }
+.jarvis-panel-header h2 { margin: .2rem 0 0; font-size: .78rem; font-weight: 620; letter-spacing: .025em; }
+.jarvis-kicker { margin: 0; color: #567176; font-size: .52rem; font-weight: 700; }
+.jarvis-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 8rem; padding: 1.3rem; color: #70868b; text-align: center; font-size: .75rem; }
+.jarvis-empty small { margin-top: .4rem; max-width: 15rem; color: #4c6267; line-height: 1.5; }
+.jarvis-task { display: flex; align-items: center; gap: .7rem; border: 1px solid rgba(54,202,214,.1); padding: .7rem; color: inherit; text-decoration: none; transition: border-color .18s ease, background .18s ease; }
+.jarvis-task:hover { border-color: rgba(54,202,214,.34); background: rgba(54,202,214,.04); }
+.jarvis-task-check { display: grid; width: 1.5rem; height: 1.5rem; place-items: center; border: 1px solid rgba(54,202,214,.32); color: #36cad6; }
+.jarvis-task span { display: flex; flex-direction: column; }
+.jarvis-task strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .72rem; font-weight: 590; }
+.jarvis-task small { margin-top: .2rem; color: #546b70; font: .52rem/1 ui-monospace, monospace; text-transform: uppercase; }
+
+.arc-reactor-frame::before, .arc-reactor-frame::after { content: ""; position: absolute; width: min(62vh, 34rem); aspect-ratio: 1; border-radius: 50%; pointer-events: none; }
+.arc-reactor-frame::before { border: 1px solid rgba(54,202,214,.17); border-left-style: dashed; border-right-style: dashed; animation: spin 28s linear infinite; }
+.arc-reactor-frame::after { width: min(44vh, 24rem); border: 1px solid rgba(242,173,78,.14); border-top-color: transparent; border-bottom-color: transparent; animation: spin 18s linear infinite reverse; }
+
+@keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse-ring { 50% { transform: scale(1.035); opacity: .72; } }
+.animate-fade-up { animation: fade-up .5s cubic-bezier(.16,1,.3,1) both; }
+.conversation-mic-host { flex-shrink: 0; }
+.conversation-mic-host > button { aspect-ratio: 1; width: 3rem; height: 3rem; min-width: 3rem; min-height: 3rem; max-width: 3rem; max-height: 3rem; border-radius: 999px; padding: 0; overflow: visible; }
+
+@media (max-width: 780px) {
+	.jarvis-app { overflow-y: auto; }
+	.jarvis-launch-grid { grid-template-columns: 1fr; grid-template-rows: auto; gap: 2rem; padding: 5rem 1.4rem 6rem; }
+	.jarvis-launch-copy h1 { font-size: clamp(3.3rem, 17vw, 5.3rem); }
+	.jarvis-core { width: min(78vw, 22rem); grid-row: 1; }
+	.jarvis-launch-copy { grid-row: 2; }
+	.jarvis-capabilities { grid-row: 3; grid-template-columns: 1fr; }
+	.jarvis-footer { display: none; }
 }
 
-.animate-fade-up-d3 {
-	animation-delay: 180ms;
-}
-
-.conversation-mic-host {
-	flex-shrink: 0;
-}
-
-.conversation-mic-host > button {
-	aspect-ratio: 1 / 1;
-	width: 3rem;
-	height: 3rem;
-	min-width: 3rem;
-	min-height: 3rem;
-	max-width: 3rem;
-	max-height: 3rem;
-	border-radius: 9999px;
-	padding: 0;
-	box-sizing: border-box;
-	overflow: visible;
-}
-
-@media (min-width: 640px) {
-	.conversation-mic-host > button {
-		width: 3.5rem;
-		height: 3.5rem;
-		min-width: 3.5rem;
-		min-height: 3.5rem;
-		max-width: 3.5rem;
-		max-height: 3.5rem;
-	}
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
 }

@@ -11,8 +11,11 @@
 | `/get_config`  | GET    | Query: optional `channel`, optional `uid`                                            | `{ "code": 0, "msg": "success", "data": { app_id, token, uid, channel_name, agent_uid } }`   | `500` if `agent is None`; exceptions via `_to_http_error`        |
 | `/startAgent`  | POST   | JSON `StartAgentRequest`: `channelName`, `rtcUid`, `userUid`, optional `parameters`  | `{ "code": 0, "msg": "success", "data": { agent_id, channel_name, status } }`                | `400` validation (`ValueError`); `500` runtime / generic        |
 | `/stopAgent`   | POST   | JSON `StopAgentRequest`: `agentId`                                                   | `{ "code": 0, "msg": "success" }`                                                            | Same shape                                                       |
+| `/health`      | GET    | None                                                                                 | Non-secret Agora, Custom LLM, and Notion readiness                                               | —                                                                |
+| `/tasks/recent`| GET    | None                                                                                 | `{ code, msg, data: { configured, tasks } }`                                                     | —                                                                |
+| `/chat/completions` | POST | OpenAI-compatible body + bearer proxy key                                        | JSON or SSE response with server-side tool execution                                              | `401`, `422`, `503`                                              |
 
-CORS middleware: `allow_origins=["*"]`, `allow_credentials=True`.
+CORS middleware reads comma-separated `CORS_ORIGINS` and disables credentials.
 
 `StartAgentRequest.parameters` is optional — the handler only reads `output_audio_codec` from it today.
 
@@ -27,6 +30,8 @@ CORS middleware: `allow_origins=["*"]`, `allow_credentials=True`.
 | `/api/get_config`  | `${AGENT_BACKEND_URL}/get_config`             |
 | `/api/startAgent`  | `${AGENT_BACKEND_URL}/startAgent`             |
 | `/api/stopAgent`   | `${AGENT_BACKEND_URL}/stopAgent`              |
+| `/api/health`      | `${AGENT_BACKEND_URL}/health`                 |
+| `/api/tasks/recent`| `${AGENT_BACKEND_URL}/tasks/recent`           |
 
 `verify-api-contracts.ts` asserts that no `web/app/api/**/route.ts` files exist. Adding one would create a competing handler in front of the rewrite — don't.
 
@@ -36,6 +41,7 @@ CORS middleware: `allow_origins=["*"]`, `allow_credentials=True`.
 | ---------------------- | ----------------------------------------- |
 | Python server (required) | `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE` |
 | Python server (optional) | `AGENT_GREETING`, `PORT`                 |
+| Python server (tool path) | `CUSTOM_LLM_URL`, `CUSTOM_LLM_PROXY_KEY`, `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`, `NOTION_API_KEY`, `NOTION_DATA_SOURCE_ID`, `NOTION_TITLE_PROPERTY` |
 | Next build             | `AGENT_BACKEND_URL`                       |
 | Browser                | `NEXT_PUBLIC_AGENT_UID` (optional)        |
 

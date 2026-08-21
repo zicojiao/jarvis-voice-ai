@@ -14,11 +14,11 @@ from agora_agent.agentkit.vendors import DeepgramSTT, MiniMaxTTS, OpenAI
 
 logger = logging.getLogger("uvicorn.error")
 
-ADA_PROMPT = """You are Ada, an agentic developer advocate from Agora. You help developers understand and build with Agora's Conversational AI platform.
+JARVIS_PROMPT = """You are J.A.R.V.I.S., a precise English voice assistant connected to the user's Notion task list.
 
-Agora is a real-time communications company. The product you represent is the Agora Conversational AI Engine.
+Your primary job is task capture. When the user asks to add, create, save, remember, or track a task, call create_notion_task. Preserve the user's intended title, due date, priority, and useful details. Ask one concise clarification only when the task title is genuinely missing.
 
-If you do not know a specific fact about Agora, say so plainly and suggest checking docs.agora.io. Keep most replies to one or two sentences unless the user explicitly asks for more detail.
+Never claim a task was created unless the tool result says ok=true. If the tool reports an error, state the problem plainly and suggest the exact missing setup or retry. After a successful tool call, confirm the task title in one short sentence. Keep all spoken responses concise and natural.
 """
 
 
@@ -35,7 +35,7 @@ class Agent:
         self.app_certificate = os.getenv("AGORA_APP_CERTIFICATE")
         self.greeting = os.getenv(
             "AGENT_GREETING",
-            "Hi there! I'm Ada, your virtual assistant from Agora. How can I help?",
+            "J.A.R.V.I.S. online. Tell me what you want added to Notion.",
         )
 
         if not self.app_id or not self.app_certificate:
@@ -64,17 +64,40 @@ class Agent:
             raise ValueError("agent_uid is required and cannot be empty")
         if user_uid <= 0:
             raise ValueError("user_uid is required and cannot be empty")
+        max_sessions = int(os.getenv("MAX_ACTIVE_SESSIONS", "3"))
+        if len(self._sessions) >= max_sessions:
+            raise RuntimeError("Demo is at its active conversation limit. Try again shortly.")
 
-        # Default managed path: DeepgramSTT + OpenAI + MiniMaxTTS.
-        llm = OpenAI(
-            model="gpt-4o-mini",
-            greeting_message=self.greeting,
-            failure_message="Please wait a moment.",
-            max_history=15,
-            max_tokens=1024,
-            temperature=0.7,
-            top_p=0.95,
-        )
+        custom_llm_url = os.getenv("CUSTOM_LLM_URL", "").strip()
+        custom_llm_proxy_key = os.getenv("CUSTOM_LLM_PROXY_KEY", "").strip()
+        llm_model = os.getenv("LLM_MODEL", "gpt-4o-mini")
+        if custom_llm_url:
+            if not custom_llm_proxy_key:
+                raise ValueError(
+                    "CUSTOM_LLM_PROXY_KEY is required when CUSTOM_LLM_URL is set"
+                )
+            llm = OpenAI(
+                api_key=custom_llm_proxy_key,
+                base_url=custom_llm_url,
+                model=llm_model,
+                greeting_message=self.greeting,
+                failure_message="The task service is temporarily unavailable.",
+                max_history=15,
+                max_tokens=1024,
+                temperature=0.3,
+                top_p=0.9,
+            )
+        else:
+            # Keep the official managed path available for baseline validation.
+            llm = OpenAI(
+                model="gpt-4o-mini",
+                greeting_message=self.greeting,
+                failure_message="Please wait a moment.",
+                max_history=15,
+                max_tokens=1024,
+                temperature=0.3,
+                top_p=0.9,
+            )
         stt = DeepgramSTT(model="nova-3", language="en")
         tts = MiniMaxTTS(model="speech_2_6_turbo", voice_id="English_captivating_female1")
 
@@ -112,7 +135,7 @@ class Agent:
 
         agora_agent = AgoraAgent(
             client=self.client,
-            instructions=ADA_PROMPT,
+            instructions=JARVIS_PROMPT,
             greeting=self.greeting,
             failure_message="Please wait a moment.",
             max_history=50,

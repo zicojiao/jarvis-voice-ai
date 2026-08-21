@@ -1,78 +1,51 @@
-# Agora Conversational AI Demo — Architecture
+# J.A.R.V.I.S. Voice Task Agent — Architecture
 
-This quickstart keeps the web UI and backend responsibilities separate. The Next.js app owns the browser-facing `/api/*` URLs, and `next.config.ts` rewrites them to the Python FastAPI service that owns token generation and agent lifecycle.
+## Topology
 
-## Python-Backed Request Flow
-
-```
+```text
 Browser
-  ↓
-Next.js app
-  ↓
-/api/* rewrites through AGENT_BACKEND_URL
-  ↓
-FastAPI service
-  ↓
-Agora Cloud Services
+  ├─ Agora RTC/RTM ──────────────> Agora Conversational AI
+  └─ Next.js /api/* ─────────────> FastAPI on Railway
+                                        ├─ agent lifecycle and tokens
+Agora Conversational AI ────────────────> private /chat/completions
+                                        ├─ OpenAI API
+                                        └─ Notion REST API
 ```
 
-- `web` owns the browser UI and the `/api/*` entrypoints
-- `server` owns the actual token generation and agent start/stop logic
-- this is the mode used by `bun run dev`
+The Vercel-hosted Next.js app owns presentation and browser-facing `/api/*` URLs. Its rewrites forward lifecycle, health, and recent-task requests to FastAPI through `AGENT_BACKEND_URL`.
 
-## Shared Conversation Flow
+FastAPI owns all secrets, Agora session creation, the OpenAI-compatible streaming endpoint, tool execution, and the recent-task view. The browser never receives provider credentials.
 
-### 1. Connection
+## Conversation lifecycle
 
-```
-Frontend: GET /api/get_config
-  → Generate Token007 config for a user UID, agent UID, and channel
-  → Frontend joins RTC and logs into RTM
-```
+1. `GET /api/get_config` returns short-lived Agora RTC/RTM connection data.
+2. The browser joins the channel and calls `POST /api/startAgent`.
+3. The agent uses `CUSTOM_LLM_URL` as its LLM endpoint and authenticates with `CUSTOM_LLM_PROXY_KEY`.
+4. The custom LLM streams model output and executes `create_notion_task` when requested.
+5. `NotionTaskService` creates a page under `NOTION_DATA_SOURCE_ID` using Notion API version `2025-09-03`.
+6. The result is spoken over Agora and exposed by `GET /api/tasks/recent` for the UI.
+7. `POST /api/stopAgent` stops the cloud agent session.
 
-### 2. Agent Start
+If `CUSTOM_LLM_URL` is absent, the original Agora-managed LLM remains available. If Notion is unconfigured or rejects a write, the tool returns an explicit failure and the assistant must not claim success.
 
-```
-Frontend: POST /api/startAgent { channelName, rtcUid, userUid }
-  → Build agent session
-  → Scope remote_uids to the requesting user
-  → Start session and return agent_id
-```
+## Backend endpoints
 
-### 3. Conversation
+| Endpoint | Method | Responsibility |
+| --- | --- | --- |
+| `/get_config` | GET | Generate Agora connection config |
+| `/startAgent` | POST | Start an Agora agent session |
+| `/stopAgent` | POST | Stop an Agora agent session |
+| `/chat/completions` | POST | Authenticated OpenAI-compatible LLM and tool loop |
+| `/tasks/recent` | GET | Show recent real task results |
+| `/health` | GET | Non-secret deployment readiness |
 
-```
-User audio → RTC
-  → Managed ASR, LLM, and TTS pipeline
-  → Agent audio + RTM transcript events
-  → UIKit transcript and visualizer in the web app
-```
+## Security and correctness invariants
 
-### 4. Agent Stop
+- Provider keys and the Agora certificate remain backend-only.
+- `/chat/completions` requires a separate proxy bearer key; the upstream OpenAI key is never given to Agora.
+- Notion tool executions are idempotent by `tool_call_id` within the server process.
+- The Notion page title is the only schema-dependent property; details, due date, and priority are written as page content.
+- CORS is restricted by `CORS_ORIGINS` when configured.
+- Health responses reveal configuration state but never credential values.
 
-```
-Frontend: POST /api/stopAgent { agentId }
-  → Stop session directly or through stateless fallback
-  → Client cleans up RTC and RTM state
-```
-
-## API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/get_config` | GET | Generate connection config (Token007, channel, UIDs) |
-| `/startAgent` | POST | Start the agent session |
-| `/stopAgent` | POST | Stop the agent by `agent_id` |
-
-Frontend calls these as `/api/*`. Next rewrites those calls to `AGENT_BACKEND_URL`; the Next app does not run token or AgentKit logic in-process.
-
-## Authentication
-
-Token007 (AccessToken2) — generated from `AGORA_APP_ID` + `AGORA_APP_CERTIFICATE` only. No API_KEY/API_SECRET needed. The SDK handles token generation and API auth internally.
-
-## Detailed Documentation
-
-- [docs/ai/L1/02_architecture.md](./docs/ai/L1/02_architecture.md) — web ↔ FastAPI topology, rewrites, lifecycle
-- [docs/ai/L1/03_code_map.md](./docs/ai/L1/03_code_map.md) — where code lives under `web/` and `server/`
-- [AGENTS.md](./AGENTS.md) — AI agent development guide
-- [README.md](./README.md) — Quick start, configuration, deployment
+More detail lives in [docs/ai/L1/02_architecture.md](./docs/ai/L1/02_architecture.md), [docs/ai/L1/06_interfaces.md](./docs/ai/L1/06_interfaces.md), and [docs/ai/L1/08_security.md](./docs/ai/L1/08_security.md).

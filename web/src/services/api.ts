@@ -69,3 +69,30 @@ export async function stopAgent(agentId: string): Promise<void> {
     throw new Error(error.detail || `HTTP ${response.status}`)
   }
 }
+
+export type RecentTask = {
+  id: string
+  title: string
+  url: string
+  due_date?: string | null
+  priority?: string | null
+  status: 'created'
+  created_at: string
+}
+
+export async function getRecentTasks(): Promise<{ configured: boolean; tasks: RecentTask[] }> {
+  const response = await fetch(`${API_BASE_URL}/tasks/recent`, { method: 'GET', cache: 'no-store' })
+  if (!response.ok) throw new Error(`Task feed unavailable (${response.status})`)
+  const result = await response.json()
+  if (result.code !== 0 || !result.data) throw new Error(result.msg || 'Task feed unavailable')
+  return result.data
+}
+
+export async function getSystemHealth(): Promise<{
+  status: string
+  services: Record<string, { configured?: boolean; enabled_for_agent?: boolean }>
+}> {
+  const response = await fetch(`${API_BASE_URL}/health`, { method: 'GET', cache: 'no-store' })
+  if (!response.ok) throw new Error(`System check failed (${response.status})`)
+  return response.json()
+}

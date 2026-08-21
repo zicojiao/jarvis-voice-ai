@@ -17,6 +17,8 @@
 | Next build/run | `AGENT_BACKEND_URL`                                                    |
 | FastAPI        | `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`, `AGENT_GREETING`, `PORT`      |
 
+The task-agent path also keeps `LLM_API_KEY`, `NOTION_API_KEY`, and `CUSTOM_LLM_PROXY_KEY` in FastAPI only. The value placed in Agora's LLM `api_key` field is the separate proxy key, never the upstream OpenAI credential.
+
 Mark `AGORA_APP_CERTIFICATE` as a sensitive secret in whichever host runs the Python service. The certificate value never appears in `web/`.
 
 ## Token Issuance
@@ -48,7 +50,7 @@ This is suitable for a local-only quickstart. For a public deploy:
 
 ## Authentication
 
-- No bearer-token or API-key middleware on FastAPI routes.
+- `/chat/completions` requires the `CUSTOM_LLM_PROXY_KEY` bearer credential when configured; browser-facing demo routes remain unauthenticated.
 - No auth in the Next.js rewrites; the browser hits the rewrite directly.
 - Anyone with the deployed web URL can start an agent session.
 

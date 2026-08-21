@@ -65,6 +65,31 @@ def test_start_wires_managed_openai_and_returns_shape(fake_env, monkeypatch):
     assert captured["remote_uids"] == ["222"]
 
 
+def test_start_wires_custom_llm_without_exposing_upstream_key(fake_env, monkeypatch):
+    monkeypatch.setenv("CUSTOM_LLM_URL", "https://backend.example/chat/completions")
+    monkeypatch.setenv("CUSTOM_LLM_PROXY_KEY", "proxy-secret")
+    monkeypatch.setenv("LLM_API_KEY", "upstream-secret")
+    agent = _fresh_agent_module()
+    captured = {}
+
+    class FakeSession:
+        async def start(self):
+            return "custom-agent-id"
+
+    def fake_create_async_session(self, **kwargs):
+        captured["llm"] = self.llm
+        return FakeSession()
+
+    from agora_agent.agentkit import Agent as AgoraAgent
+
+    monkeypatch.setattr(AgoraAgent, "create_async_session", fake_create_async_session)
+    asyncio.run(agent.Agent().start(channel_name="ch", agent_uid=111, user_uid=222))
+
+    assert captured["llm"]["url"] == "https://backend.example/chat/completions"
+    assert captured["llm"]["api_key"] == "proxy-secret"
+    assert "upstream-secret" not in str(captured["llm"])
+
+
 def test_start_validates_arguments(fake_env, monkeypatch):
     agent = _fresh_agent_module()
     from agora_agent.agentkit import Agent as AgoraAgent

@@ -59,6 +59,20 @@ def test_stop_agent(client):
     assert client.fake_agent.stopped == ["fake-agent-111"]
 
 
+def test_health_and_recent_tasks_do_not_expose_secrets(client):
+    health = client.get("/health")
+    assert health.status_code == 200
+    body = health.json()
+    assert body["status"] == "ok"
+    assert body["services"]["agora"]["configured"] is True
+    assert "API_KEY" not in str(body)
+
+    tasks = client.get("/tasks/recent")
+    assert tasks.status_code == 200
+    assert tasks.json()["data"]["configured"] is False
+    assert tasks.json()["data"]["tasks"] == []
+
+
 def test_value_error_maps_to_400(client, server_module):
     class BadAgent:
         async def start(self, **kwargs):

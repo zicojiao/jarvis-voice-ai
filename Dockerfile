@@ -1,21 +1,12 @@
-# syntax=docker/dockerfile:1
-FROM python:3.12-slim-bookworm AS runtime
+FROM python:3.12-slim
 
-# Run as a non-root user (created before any COPY so --chown can reference it).
-RUN useradd --create-home --uid 10001 app
-WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PORT=8000
 
-# Python dependencies for the FastAPI backend (installed as root into the
-# system site-packages, world-readable for the app user at runtime).
-COPY server/requirements.txt /tmp/server-req.txt
-RUN pip install --no-cache-dir -r /tmp/server-req.txt
+WORKDIR /app/server
+COPY server/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+COPY server ./
 
-# Backend source, owned by the runtime user.
-COPY --chown=app:app server/src /app/server/src
-
-# Drop privileges for the running process.
-USER app
-
-# server.py reads $PORT (default 8000) and binds 0.0.0.0.
-EXPOSE 8000
-CMD ["python", "/app/server/src/server.py"]
+CMD ["python", "src/server.py"]

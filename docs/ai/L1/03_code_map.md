@@ -62,6 +62,8 @@ server/                   # Python FastAPI backend
     __init__.py
     server.py             # FastAPI app + APIRouter routes
     agent.py              # Agent class: start, stop, vendor chain
+    custom_llm.py         # OpenAI-compatible streaming proxy + tool execution
+    notion_service.py     # Notion data-source task creation + recent task state
   scripts/
     run_fake_server.py    # Patches Agent to a FakeAgent for smoke tests
 ```
@@ -81,6 +83,8 @@ server/                   # Python FastAPI backend
 | `web/scripts/verify-local-fastapi.ts`               | Spawns `server/scripts/run_fake_server.py`, exercises full path.         |
 | `server/src/server.py`                              | FastAPI app, env loading, three routes, response envelope, error mapping.|
 | `server/src/agent.py`                               | `Agent` class — vendor chain + async session lifecycle.                  |
+| `server/src/custom_llm.py`                          | Custom LLM proxy, auth boundary, and five-pass tool loop.                |
+| `server/src/notion_service.py`                      | Notion API 2025-09-03 task creation and idempotency.                     |
 | `server/scripts/run_fake_server.py`                 | Patches `server.agent` to `FakeAgent` for verification.                  |
 
 ## Module Boundaries

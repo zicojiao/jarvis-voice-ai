@@ -32,6 +32,14 @@ const nextConfig: NextConfig = {
         source: '/api/stopAgent',
         destination: `${backendUrl}/stopAgent`,
       },
+      {
+        source: '/api/health',
+        destination: `${backendUrl}/health`,
+      },
+      {
+        source: '/api/tasks/recent',
+        destination: `${backendUrl}/tasks/recent`,
+      },
     ]
   },
 }

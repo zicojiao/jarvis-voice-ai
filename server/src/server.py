@@ -24,6 +24,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from agora_agent.agentkit.token import generate_convo_ai_token
 from agent import Agent
+from custom_llm import router as custom_llm_router
+from notion_service import notion_tasks
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -67,8 +69,14 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=[
+        origin.strip()
+        for origin in os.getenv(
+            "CORS_ORIGINS", "http://localhost:3000"
+        ).split(",")
+        if origin.strip()
+    ],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -194,7 +202,38 @@ async def stop_agent(request: StopAgentRequest):
         raise _to_http_error(e)
 
 
+@router.get("/health")
+async def health():
+    """Deployment and UI readiness without exposing secrets."""
+    return {
+        "status": "ok",
+        "services": {
+            "agora": {"configured": agent is not None},
+            "custom_llm": {
+                "configured": bool(
+                    os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY")
+                ),
+                "enabled_for_agent": bool(os.getenv("CUSTOM_LLM_URL")),
+            },
+            "notion": notion_tasks.status(),
+        },
+    }
+
+
+@router.get("/tasks/recent")
+async def recent_tasks():
+    return {
+        "code": 0,
+        "msg": "success",
+        "data": {
+            "configured": notion_tasks.configured,
+            "tasks": notion_tasks.recent_tasks(),
+        },
+    }
+
+
 app.include_router(router)
+app.include_router(custom_llm_router)
 
 
 if __name__ == "__main__":

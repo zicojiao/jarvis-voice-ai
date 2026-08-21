@@ -2,13 +2,11 @@
 
 import type { RTMClient } from "agora-rtm";
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { QuickstartPreCallCard } from "@/components/QuickstartPreCallCard";
-import { ShareButton } from "@/components/share-button";
 import { getConfig, startAgent, stopAgent } from "@/services/api";
 import type { AgoraRenewalTokens, AgoraTokenData } from "@/types/conversation";
 
@@ -189,7 +187,7 @@ export default function LandingPage() {
 	};
 
 	return (
-		<div className="relative flex h-dvh min-h-screen flex-col overflow-hidden bg-background text-foreground">
+		<div className="jarvis-app relative flex h-dvh min-h-screen flex-col overflow-hidden bg-background text-foreground">
 			<div
 				className={`flex min-h-0 flex-1 flex-col ${
 					showConversation
@@ -239,35 +237,9 @@ export default function LandingPage() {
 				</div>
 			</div>
 
-			<footer
-				className={`fixed inset-x-0 bottom-0 z-40 flex items-center gap-4 px-4 py-4 md:px-6 md:py-6 ${
-					showConversation ? "justify-end" : "justify-between"
-				}`}
-			>
-				{!showConversation ? <ShareButton menuPlacement="top" /> : null}
-				<div className="flex items-center justify-end gap-2 text-muted-foreground">
-					<span className="text-xs font-medium uppercase tracking-wide">
-						Powered by
-					</span>
-					<a
-						href="https://agora.io/en/"
-						target="_blank"
-						rel="noopener noreferrer"
-						className="transition-colors hover:text-primary"
-						aria-label="Visit Agora's website"
-					>
-						<Image
-							src="/agora-logo-rgb-blue.svg"
-							alt="Agora"
-							width={86}
-							height={24}
-							priority
-							className="h-6 w-auto translate-y-1 transition-opacity hover:opacity-80"
-						/>
-						<span className="sr-only">Agora</span>
-					</a>
-				</div>
-			</footer>
+			{!showConversation ? (
+				<footer className="jarvis-footer"><span>J.A.R.V.I.S. PROTOTYPE</span><a href="https://agora.io/en/" target="_blank" rel="noreferrer">Powered by Agora</a></footer>
+			) : null}
 		</div>
 	);
 }

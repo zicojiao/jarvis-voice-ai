@@ -2,7 +2,7 @@ import { existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 
 import nextConfig from '../next.config'
-import { getConfig, startAgent, stopAgent } from '../src/services/api'
+import { getConfig, getRecentTasks, getSystemHealth, startAgent, stopAgent } from '../src/services/api'
 
 type Rewrite = {
   source: string
@@ -66,6 +66,19 @@ async function verifyRewriteContract() {
         (rewrite) => rewrite.source === '/api/stopAgent' && rewrite.destination === 'http://localhost:8000/stopAgent',
       ),
       'next.config.ts should rewrite /api/stopAgent to /stopAgent on the Python backend',
+    )
+    assert(
+      rewrites.some(
+        (rewrite) => rewrite.source === '/api/health' && rewrite.destination === 'http://localhost:8000/health',
+      ),
+      'next.config.ts should rewrite /api/health to /health on the Python backend',
+    )
+    assert(
+      rewrites.some(
+        (rewrite) =>
+          rewrite.source === '/api/tasks/recent' && rewrite.destination === 'http://localhost:8000/tasks/recent',
+      ),
+      'next.config.ts should rewrite /api/tasks/recent to /tasks/recent on the Python backend',
     )
   } finally {
     if (originalBackendUrl) {
@@ -151,6 +164,16 @@ async function verifyApiClientRequests() {
       return Response.json({ code: 0, msg: 'success' })
     }
 
+    if (url.pathname === '/api/tasks/recent') {
+      assert(init?.method === 'GET', 'GET /api/tasks/recent should use GET')
+      return Response.json({ code: 0, msg: 'success', data: { configured: true, tasks: [] } })
+    }
+
+    if (url.pathname === '/api/health') {
+      assert(init?.method === 'GET', 'GET /api/health should use GET')
+      return Response.json({ status: 'ok', services: { agora: { configured: true } } })
+    }
+
     return Response.json({ detail: `Unexpected request path: ${url.pathname}` }, { status: 404 })
   }) as typeof fetch
 
@@ -162,9 +185,12 @@ async function verifyApiClientRequests() {
     assert(agentId === 'mock-agent-id', 'POST /api/startAgent should return the agent id')
 
     await stopAgent(agentId)
+    await getRecentTasks()
+    await getSystemHealth()
 
     assert(
-      JSON.stringify(seenPaths) === JSON.stringify(['/api/get_config', '/api/startAgent', '/api/stopAgent']),
+      JSON.stringify(seenPaths) ===
+        JSON.stringify(['/api/get_config', '/api/startAgent', '/api/stopAgent', '/api/tasks/recent', '/api/health']),
       'API client should call the unversioned /api paths',
     )
   } finally {

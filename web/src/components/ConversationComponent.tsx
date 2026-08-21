@@ -14,6 +14,7 @@ import {
 	QuickstartPipelineMetrics,
 } from "@/components/QuickstartPipelineMetrics";
 import { QuickstartTranscriptPanel } from "@/components/QuickstartTranscriptPanel";
+import { RecentTasksPanel } from "@/components/RecentTasksPanel";
 import { DEFAULT_AGENT_UID } from "@/lib/agora";
 import {
 	getCurrentInProgressMessage,
@@ -453,9 +454,10 @@ export default function ConversationComponent({
 					agentUID={agentUID}
 				/>
 			}
+			taskPanel={<RecentTasksPanel />}
 			visualizer={
 				<section
-					className="relative flex h-full min-h-[20rem] w-full max-w-4xl items-center justify-center"
+					className="arc-reactor-frame relative flex h-full min-h-[20rem] w-full max-w-4xl items-center justify-center"
 					aria-label="AI agent status visualization"
 				>
 					<AgentVisualizer state={visualizerState} size="lg" />
@@ -468,7 +470,7 @@ export default function ConversationComponent({
 			}
 			controls={
 				<fieldset
-					className="mx-auto flex w-fit items-center gap-3 rounded-full border border-border bg-card/80 px-4 py-2 backdrop-blur-md"
+					className="mx-auto flex w-fit items-center gap-3 rounded-full border border-primary/20 bg-[#06141c]/90 px-4 py-2 shadow-[0_0_36px_rgba(50,209,220,0.08)] backdrop-blur-md"
 					aria-label="Audio controls"
 				>
 					<div className="conversation-mic-host flex items-center justify-center">

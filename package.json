@@ -1,5 +1,5 @@
 {
-  "name": "agora-conversational-ai-demo",
+  "name": "jarvis-voice-ai",
   "version": "1.0.0",
   "private": true,
   "workspaces": [
@@ -24,7 +24,7 @@
     "verify": "bun run verify:web",
     "verify:local": "bun run doctor:local && bun run verify:backend && bun run verify:local:fastapi && bun run verify:web:proxy && bun run verify:web:build",
     "verify:local:fastapi": "cd web && bun run scripts/verify-local-fastapi.ts",
-    "verify:backend": "cd server && python3 -m py_compile src/server.py src/agent.py",
+    "verify:backend": "cd server && python3 -m py_compile src/server.py src/agent.py src/custom_llm.py src/notion_service.py && venv/bin/python -m pytest -q",
     "verify:web": "bun run doctor && bun run verify:web:api && bun run verify:web:build",
     "verify:web:api": "cd web && bun run scripts/verify-api-contracts.ts",
     "verify:web:proxy": "cd web && bun run scripts/verify-local-proxy.ts",

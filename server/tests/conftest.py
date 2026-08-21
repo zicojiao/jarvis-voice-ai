@@ -30,6 +30,16 @@ def fake_env(monkeypatch):
     monkeypatch.setattr(dotenv, "load_dotenv", lambda *a, **k: False)
     for key, value in FAKE_ENV.items():
         monkeypatch.setenv(key, value)
+    for key in [
+        "CUSTOM_LLM_URL",
+        "CUSTOM_LLM_PROXY_KEY",
+        "LLM_API_KEY",
+        "OPENAI_API_KEY",
+        "NOTION_API_KEY",
+        "NOTION_TOKEN",
+        "NOTION_DATA_SOURCE_ID",
+    ]:
+        monkeypatch.delenv(key, raising=False)
     return dict(FAKE_ENV)
 
 

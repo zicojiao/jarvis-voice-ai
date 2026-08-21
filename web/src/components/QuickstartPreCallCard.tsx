@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { ArrowRight, Database, Loader2, Radio, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -16,41 +16,47 @@ export function QuickstartPreCallCard({
 	onStartConversation,
 }: QuickstartPreCallCardProps) {
 	return (
-		<div
-			className="mx-auto flex w-[min(92vw,26.25rem)] animate-fade-up flex-col items-center rounded-[20px] border border-[#2b2b2b] px-10 py-10 text-center shadow-[0_10px_24px_rgba(0,0,0,0.28)]"
-			style={{
-				backgroundImage:
-					"linear-gradient(164.988deg, rgba(54,54,54,0.2) 1.0596%, rgba(0,0,0,0) 96.089%), linear-gradient(90deg, rgb(16,16,16) 0%, rgb(16,16,16) 100%)",
-			}}
-		>
-			<h1 className="text-[28px] font-medium leading-[1.2] text-white">
-				Try Agora&apos;s Voice Agent
-			</h1>
-			<p className="mt-[14px] text-sm font-medium leading-6 text-muted-foreground">
-				Built on Agora&apos;s flagship Conversational AI engine, for effortless
-				agentic conversations.
-			</p>
+		<div className="jarvis-launch-grid mx-auto w-[min(94vw,68rem)] animate-fade-up text-left">
+			<div className="jarvis-launch-copy">
+				<div className="jarvis-eyebrow"><span /> Agora Conversational AI demo</div>
+				<p className="jarvis-serial">MARK // 01 · TASK OPERATIONS</p>
+				<h1>Voice in.<br /><em>Work logged.</em></h1>
+				<p className="jarvis-intro">
+					A real-time voice assistant that turns a spoken instruction into a live Notion task—then confirms it out loud.
+				</p>
 
-			<Button
-				onClick={onStartConversation}
-				disabled={isLoading}
-				className="mt-12 h-10 w-full rounded-lg border border-primary bg-primary text-sm font-medium text-black hover:border-white hover:bg-white hover:text-black disabled:hover:border-primary disabled:hover:bg-primary disabled:hover:text-black"
+				<div className="jarvis-example">
+					<span>Try saying</span>
+					<strong>“Add prepare the KOL demo to my Notion tasks.”</strong>
+				</div>
+
+				<Button
+					onClick={onStartConversation}
+					disabled={isLoading}
+					className="jarvis-launch-button mt-9 h-12 rounded-none px-6 text-sm font-semibold uppercase tracking-[0.14em]"
 				aria-label={
 					isLoading
 						? "Starting conversation with AI agent"
 						: "Start conversation with AI agent"
 				}
-			>
-				{isLoading ? (
-					<>
-						<Loader2 className="h-4 w-4 animate-spin" />
-						Starting...
-					</>
-				) : (
-					"Start Conversation"
-				)}
-			</Button>
-			{error ? <p className="mt-3 text-xs text-destructive">{error}</p> : null}
+				>
+					{isLoading ? <><Loader2 className="h-4 w-4 animate-spin" /> Initializing</> : <>Start voice link <ArrowRight className="h-4 w-4" /></>}
+				</Button>
+				{error ? <p className="mt-3 text-xs text-destructive">{error}</p> : null}
+			</div>
+
+			<div className="jarvis-core" aria-hidden="true">
+				<div className="jarvis-core-ring ring-a" />
+				<div className="jarvis-core-ring ring-b" />
+				<div className="jarvis-core-ring ring-c" />
+				<div className="jarvis-core-center"><span>J</span><small>ONLINE</small></div>
+			</div>
+
+			<div className="jarvis-capabilities">
+				<div><Radio /><span><strong>Real-time voice</strong><small>Agora RTC + RTM</small></span></div>
+				<div><Sparkles /><span><strong>Agent reasoning</strong><small>OpenAI tool calling</small></span></div>
+				<div><Database /><span><strong>Live execution</strong><small>Notion REST API</small></span></div>
+			</div>
 		</div>
 	);
 }

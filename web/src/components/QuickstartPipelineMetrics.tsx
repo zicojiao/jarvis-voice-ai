@@ -13,7 +13,7 @@ type QuickstartPipelineMetricsProps = {
 
 const PIPELINE = [
 	{ key: "stt", label: "Deepgram STT", metricTypes: ["stt", "asr"] },
-	{ key: "llm", label: "OpenAI LLM", metricTypes: ["llm", "mllm"] },
+	{ key: "llm", label: "Tool LLM", metricTypes: ["llm", "mllm"] },
 	{ key: "tts", label: "MiniMax TTS", metricTypes: ["tts"] },
 ] as const;
 
@@ -31,8 +31,8 @@ export function QuickstartPipelineMetrics({
 
 	return (
 		<div className="flex min-w-0 flex-wrap items-center gap-2">
-			<span className="text-sm font-medium leading-6 text-muted-foreground">
-				Pipeline
+			<span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+				Live pipeline
 			</span>
 			{PIPELINE.map((step, index) => {
 				const metric = step.metricTypes
@@ -49,7 +49,7 @@ export function QuickstartPipelineMetrics({
 								/
 							</span>
 						) : null}
-						<span className="rounded-md border border-border bg-transparent px-2 py-0.5 text-xs font-semibold leading-4 text-foreground shadow-sm">
+						<span className="border border-primary/15 bg-primary/[0.035] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
 							{step.label}
 							{metric ? (
 								<span
