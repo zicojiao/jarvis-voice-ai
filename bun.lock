@@ -9,7 +9,7 @@
       },
     },
     "web": {
-      "name": "agora-conversational-ai-demo",
+      "name": "jarvis-voice-ai-web",
       "version": "1.0.0",
       "dependencies": {
         "@radix-ui/react-dropdown-menu": "^2.1.16",
@@ -251,8 +251,6 @@
 
     "agora-agent-uikit": ["agora-agent-uikit@1.1.0", "", { "dependencies": { "@lottiefiles/dotlottie-react": "^0.17.13", "@radix-ui/react-dialog": "^1.1.15", "@radix-ui/react-dropdown-menu": "^2.1.16", "@radix-ui/react-popover": "^1.1.15", "@radix-ui/react-select": "^2.2.6", "@radix-ui/react-slot": "^1.2.4", "@radix-ui/react-switch": "^1.2.6", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "cmdk": "^1.1.1", "dompurify": "^3.3.3", "lucide-react": ">=0.263.0", "tailwind-merge": "^3.4.0" }, "peerDependencies": { "agora-agent-client-toolkit": "^1.2.0", "agora-agent-client-toolkit-react": "^1.2.0", "agora-rtc-react": ">=2.0.0", "agora-rtm-sdk": ">=2.0.0", "react": ">=18.0.0", "react-dom": ">=18.0.0" }, "optionalPeers": ["agora-agent-client-toolkit", "agora-agent-client-toolkit-react", "agora-rtc-react", "agora-rtm-sdk"] }, "sha512-gDSleHFYavNEqf/SIUt8xA1Q+VAw4M9q/84MD/+fFG7Z15oSLH6hZnmI+8cr6yzPXBBXHX4dd9tRZod5UjaFyA=="],
 
-    "agora-conversational-ai-demo": ["agora-conversational-ai-demo@workspace:web"],
-
     "agora-rtc-react": ["agora-rtc-react@2.5.1", "", { "peerDependencies": { "react": ">=16.8" } }, "sha512-ORPbV02p8dZ2GhQxo5kTarc0BYjObc2IeqRPv9mi5/fxDI5nMY6kg54R5fUvLQU05H3Q5Kecq7M2kuZzHfNo5Q=="],
 
     "agora-rtc-sdk-ng": ["agora-rtc-sdk-ng@4.24.3", "", { "dependencies": { "@agora-js/media": "4.24.3", "@agora-js/protocol": "4.24.3", "@agora-js/report": "4.24.3", "@agora-js/shared": "4.24.3", "agora-rte-extension": "^1.2.4", "axios": "^1.13.6", "formdata-polyfill": "^4.0.7", "pako": "^2.1.0", "ua-parser-js": "^0.7.34", "webrtc-adapter": "8.2.0" } }, "sha512-DEz0+/jgsajZgWFG/uHijoMeheqr7YWUJ5AyubiqKt5vC1TF0/3v51vVl2aqupY+YkmJOg0q64B4AJcdpj/TBQ=="],
@@ -412,6 +410,8 @@
     "is-number": ["is-number@7.0.0", "", {}, "sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng=="],
 
     "isarray": ["isarray@1.0.0", "", {}, "sha512-VLghIWNM6ELQzo7zwmcg0NmTVyWKYjvIeM83yjp0wRDTmUnrM678fQbcKBo6n2CJEF0szoG//ytg+TKla89ALQ=="],
+
+    "jarvis-voice-ai-web": ["jarvis-voice-ai-web@workspace:web"],
 
     "jiti": ["jiti@1.21.7", "", { "bin": { "jiti": "bin/jiti.js" } }, "sha512-/imKNG4EbWNrVjoNC/1H5/9GFy+tqjGBHCaSsN+P2RnPqjsLmv6UD3Ej+Kj8nBWaRAwyk7kK5ZUc+OEatnTR3A=="],
 
