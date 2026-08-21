@@ -14,7 +14,7 @@ type QuickstartPipelineMetricsProps = {
 const PIPELINE = [
 	{ key: "stt", label: "Deepgram STT", metricTypes: ["stt", "asr"] },
 	{ key: "llm", label: "Tool LLM", metricTypes: ["llm", "mllm"] },
-	{ key: "tts", label: "MiniMax TTS", metricTypes: ["tts"] },
+	{ key: "tts", label: "Fish Audio", metricTypes: ["tts"] },
 ] as const;
 
 function formatMetricName(name: string) {
