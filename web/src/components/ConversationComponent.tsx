@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { ConnectionStatusPanel } from "@/components/ConnectionStatusPanel";
 import {
@@ -15,6 +15,7 @@ import {
 } from "@/components/QuickstartPipelineMetrics";
 import { QuickstartTranscriptPanel } from "@/components/QuickstartTranscriptPanel";
 import { RecentTasksPanel } from "@/components/RecentTasksPanel";
+import { TextMessageComposer } from "@/components/TextMessageComposer";
 import { DEFAULT_AGENT_UID } from "@/lib/agora";
 import {
 	getCurrentInProgressMessage,
@@ -23,6 +24,7 @@ import {
 	normalizeTimestampMs,
 	normalizeTranscript,
 } from "@/lib/conversation";
+import { createTextMessagePayload } from "@/lib/text-message";
 import type { ConversationComponentProps } from "@/types/conversation";
 import {
 	type AgentState,
@@ -90,8 +92,13 @@ export default function ConversationComponent({
 }: ConversationComponentProps) {
 	const client = useRTCClient();
 	const remoteUsers = useRemoteUsers();
+	const aiRef = useRef<AgoraVoiceAI | null>(null);
 	const [isEnabled, setIsEnabled] = useState(true);
 	const [isAgentConnected, setIsAgentConnected] = useState(false);
+	const [isTextMessagingReady, setIsTextMessagingReady] = useState(false);
+	const [messageDraft, setMessageDraft] = useState("");
+	const [isTextSending, setIsTextSending] = useState(false);
+	const [textSendError, setTextSendError] = useState<string | null>(null);
 	const [isConnectionDetailsOpen, setIsConnectionDetailsOpen] = useState(false);
 
 	const [connectionState, setConnectionState] = useState<string>("CONNECTING");
@@ -196,6 +203,7 @@ export default function ConversationComponent({
 					} catch {}
 					return;
 				}
+				aiRef.current = ai;
 
 				ai.on(AgoraVoiceAIEvents.TRANSCRIPT_UPDATED, (t) => {
 					setRawTranscript([...t]);
@@ -245,21 +253,25 @@ export default function ConversationComponent({
 					});
 				});
 				ai.subscribeMessage(agoraData.channel);
+				setIsTextMessagingReady(true);
 			} catch (error) {
 				if (!cancelled) {
 					console.error("[AgoraVoiceAI] init failed:", error);
+					setTextSendError("Text messaging could not initialize. Reconnect and try again.");
 				}
 			}
 		})();
 
 		return () => {
 			cancelled = true;
+			setIsTextMessagingReady(false);
 			try {
 				const ai = AgoraVoiceAI.getInstance();
 				if (ai) {
 					ai.unsubscribe();
 					ai.destroy();
 				}
+				if (aiRef.current === ai) aiRef.current = null;
 			} catch {}
 		};
 	}, [
@@ -400,6 +412,49 @@ export default function ConversationComponent({
 		}
 	}, [isEnabled, localMicrophoneTrack]);
 
+	const handleTextChange = useCallback((value: string) => {
+		setMessageDraft(value);
+		setTextSendError(null);
+	}, []);
+
+	const handleSendText = useCallback(async () => {
+		const payload = createTextMessagePayload(messageDraft);
+		if (!payload || isTextSending) return;
+
+		const ai = aiRef.current;
+		if (!ai || !isTextMessagingReady || !isAgentConnected) {
+			setTextSendError("JARVIS is still connecting. Try again in a moment.");
+			return;
+		}
+
+		setIsTextSending(true);
+		setTextSendError(null);
+		try {
+			await ai.sendText(agentUID, payload);
+			setMessageDraft("");
+		} catch (error) {
+			console.error("Failed to send text message:", error);
+			setTextSendError("Message could not be sent. Check the connection and try again.");
+			addConnectionIssue({
+				id: `${Date.now()}-${agentUID}-text-send-failed`,
+				source: "rtm",
+				agentUserId: agentUID,
+				code: "TEXT_SEND_FAILED",
+				message: error instanceof Error ? error.message : "Failed to send text message",
+				timestamp: Date.now(),
+			});
+		} finally {
+			setIsTextSending(false);
+		}
+	}, [
+		messageDraft,
+		isTextSending,
+		isTextMessagingReady,
+		isAgentConnected,
+		agentUID,
+		addConnectionIssue,
+	]);
+
 	const handleTokenWillExpire = useCallback(async () => {
 		if (!onTokenWillExpire || !joinedUID) return;
 		try {
@@ -469,24 +524,34 @@ export default function ConversationComponent({
 				</section>
 			}
 			controls={
-				<fieldset
-					className="mx-auto flex w-fit items-center gap-3 rounded-full border border-primary/20 bg-[#06141c]/90 px-4 py-2 shadow-[0_0_36px_rgba(50,209,220,0.08)] backdrop-blur-md"
-					aria-label="Audio controls"
-				>
-					<div className="conversation-mic-host flex items-center justify-center">
-						<MicButtonWithVisualizer
-							isEnabled={isEnabled}
-							setIsEnabled={setIsEnabled}
-							track={localMicrophoneTrack}
-							onToggle={handleMicToggle}
-							className="overflow-visible"
-							aria-label={isEnabled ? "Mute microphone" : "Unmute microphone"}
-							enabledColor="hsl(var(--primary))"
-							disabledColor="hsl(var(--destructive))"
-						/>
-					</div>
-					<MicrophoneSelector localMicrophoneTrack={localMicrophoneTrack} />
-				</fieldset>
+				<div className="jarvis-interaction-dock mx-auto flex w-full flex-col items-center gap-3 px-3">
+					<TextMessageComposer
+						value={messageDraft}
+						isSending={isTextSending}
+						isReady={isTextMessagingReady && isAgentConnected && connectionState === "CONNECTED"}
+						error={textSendError}
+						onChange={handleTextChange}
+						onSend={handleSendText}
+					/>
+					<fieldset
+						className="flex w-fit items-center gap-3 rounded-full border border-primary/20 bg-[#06141c]/90 px-4 py-2 shadow-[0_0_36px_rgba(50,209,220,0.08)] backdrop-blur-md"
+						aria-label="Audio controls"
+					>
+						<div className="conversation-mic-host flex items-center justify-center">
+							<MicButtonWithVisualizer
+								isEnabled={isEnabled}
+								setIsEnabled={setIsEnabled}
+								track={localMicrophoneTrack}
+								onToggle={handleMicToggle}
+								className="overflow-visible"
+								aria-label={isEnabled ? "Mute microphone" : "Unmute microphone"}
+								enabledColor="hsl(var(--primary))"
+								disabledColor="hsl(var(--destructive))"
+							/>
+						</div>
+						<MicrophoneSelector localMicrophoneTrack={localMicrophoneTrack} />
+					</fieldset>
+				</div>
 			}
 			onEndConversation={handleEndConversation}
 		/>

@@ -19,7 +19,7 @@
    Agora media + RTM cloud                                       (managed STT + custom GLM + Fish Audio TTS)
 ```
 
-## Voice Session Lifecycle
+## Live Session Lifecycle
 
 1. `LandingPage` calls `getConfig()` → `GET /api/get_config` → FastAPI returns `data: { app_id, token, uid, channel_name, agent_uid }`.
 2. In parallel:
@@ -30,8 +30,9 @@
    - `useLocalMicrophoneTrack` + `usePublish` start mic publishing.
    - `AgoraVoiceAI.init({ rtcEngine, rtmConfig: { rtmEngine: rtmClient } })` wires transcripts, state, metrics.
    - `subscribeMessage(channel_name)` opens the toolkit's RTM channel.
-4. End: `stopAgent(agentId)` → `POST /api/stopAgent` → FastAPI stops the agent. `rtmClient.logout()` follows.
-5. Renewal: on RTC `token-privilege-will-expire`, the client fetches `getConfig()` twice (once for RTC uid, once for the stored `agoraData.uid`) and renews RTC + RTM separately.
+4. The user can speak over the published RTC microphone or type in `TextMessageComposer`. Typed messages call `AgoraVoiceAI.sendText(agent_uid, payload)` and travel directly to the agent over RTM with interrupted priority.
+5. End: `stopAgent(agentId)` → `POST /api/stopAgent` → FastAPI stops the agent. `rtmClient.logout()` follows.
+6. Renewal: on RTC `token-privilege-will-expire`, the client fetches `getConfig()` twice (once for RTC uid, once for the stored `agoraData.uid`) and renews RTC + RTM separately.
 
 ## How `/api/*` Reaches FastAPI
 

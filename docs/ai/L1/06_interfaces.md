@@ -96,6 +96,19 @@ agent_id = await session.start()
 
 ## RTM Event Shapes (Client-Side)
 
+Typed input uses the existing authenticated RTM connection rather than an HTTP chat route:
+
+```ts
+AgoraVoiceAI.sendText(agentUID, {
+  messageType: ChatMessageType.TEXT,
+  priority: ChatMessagePriority.INTERRUPTED,
+  responseInterruptable: true,
+  text,
+})
+```
+
+Messages are limited to 1,000 characters in the client, trimmed before sending, and share the active agent's transcript, tools, and spoken response path.
+
 `AgoraVoiceAI` emits the same toolkit events as the other quickstarts:
 
 - `TRANSCRIPT_UPDATED` — `{ uid, text, status, timestamp }[]`

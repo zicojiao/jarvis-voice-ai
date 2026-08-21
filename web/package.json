@@ -6,10 +6,11 @@
     "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
+    "test": "bun test src",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "verify:api": "bun run scripts/verify-api-contracts.ts",
-    "verify": "bun run doctor && bun run verify:api && bun run build"
+    "verify": "bun run doctor && bun run test && bun run verify:api && bun run build"
   },
   "dependencies": {
     "@radix-ui/react-dropdown-menu": "^2.1.16",

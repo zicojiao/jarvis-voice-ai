@@ -47,6 +47,7 @@ There is **no ESLint config file** in `web/` — Biome is the only TS/JS linter.
 - The RTC client is held in a `useRef` inside a dynamically imported `AgoraRTCProvider` to survive React StrictMode double-mount.
 - `useJoin`, `useLocalMicrophoneTrack`, `usePublish` from `agora-rtc-react` own normal mount/unmount lifecycles — avoid duplicate cleanup effects that call `.leave()`, `.close()`, or `unpublish`.
 - The explicit end-call button is the exception: `ConversationComponent.handleEndConversation` unpublishes and closes the active microphone track before delegating to `LandingPage.onEndConversation`.
+- `ConversationComponent` owns the live `AgoraVoiceAI` instance used by `TextMessageComposer`; typed messages go through `sendText` and must not add a parallel backend chat endpoint.
 - `normalizeTranscript` in `web/src/lib/conversation.ts` remaps `uid === '0'` to the local UID. Keep this remap upstream of any side-of-screen heuristic.
 
 ## Hook Ownership Quick Reference
@@ -59,9 +60,9 @@ There is **no ESLint config file** in `web/` — Biome is the only TS/JS linter.
 
 ## Testing
 
-- Python: no pytest harness today. `bun run verify:backend` runs `py_compile` so syntax regressions surface; it does not execute imports or catch runtime SDK/env failures.
-- TS: no Vitest harness. The verification suite has **four layers** (see `docs/ai/L1/L2/verification_scripts.md`): Python compile, contract harness (`verify-api-contracts.ts`), rewrite stub (`verify-local-proxy.ts`), and FakeAgent FastAPI smoke (`verify-local-fastapi.ts`). The `verify:web:build` step rounds them out.
-- Add Python tests under `server/tests/` if you introduce them; nothing currently imports from such a path.
+- Python: `bun run verify:backend` runs `py_compile` and the pytest suite under `server/tests/` with cloud boundaries mocked.
+- TS: colocated Bun tests use `*.test.ts` under `web/src/`; `bun run verify:web:unit` runs them. The wider verification suite also includes the contract harness (`verify-api-contracts.ts`), rewrite stub (`verify-local-proxy.ts`), FakeAgent FastAPI smoke (`verify-local-fastapi.ts`), and the production Next build.
+- Keep pure message-shaping and keyboard behavior in `web/src/lib/` so it can be unit-tested without a browser or live Agora session.
 
 ## File Naming
 

@@ -21,6 +21,7 @@ web/                      # Next.js 16 app (workspace member)
     components/
       LandingPage.tsx
       ConversationComponent.tsx
+      TextMessageComposer.tsx   # Typed-input form for the live agent
       QuickstartConversationLayout.tsx
       QuickstartTranscriptPanel.tsx
       QuickstartPipelineMetrics.tsx
@@ -37,6 +38,7 @@ web/                      # Next.js 16 app (workspace member)
     lib/
       agora.ts            # DEFAULT_AGENT_UID = 123456
       conversation.ts     # Transcript normalization + visualizer mapping
+      text-message.ts     # Agora sendText payload + keyboard behavior
       utils.ts            # cn() (clsx + tailwind-merge)
     services/
       api.ts              # getConfig / startAgent / stopAgent fetch helpers
@@ -76,8 +78,10 @@ server/                   # Python FastAPI backend
 | `web/next.config.ts`                                | Rewrites `/api/*` to `${AGENT_BACKEND_URL}/...` when env is set.         |
 | `web/src/services/api.ts`                           | Browser API client: `getConfig`, `startAgent`, `stopAgent`.              |
 | `web/src/components/LandingPage.tsx`                | Session bootstrap, RTM login, renewal handler, provider wiring.          |
-| `web/src/components/ConversationComponent.tsx`      | RTC join, `AgoraVoiceAI` init, transcript/state/metrics, mic UI.         |
+| `web/src/components/ConversationComponent.tsx`      | RTC join, `AgoraVoiceAI` init, transcript/state/metrics, voice + text UI.|
+| `web/src/components/TextMessageComposer.tsx`        | Accessible typed-input form with Enter/Shift+Enter behavior.            |
 | `web/src/lib/conversation.ts`                       | `normalizeTranscript` (uid `"0"` remap), visualizer state mapping.       |
+| `web/src/lib/text-message.ts`                       | Typed-message validation and Agora `sendText` payload construction.     |
 | `web/scripts/verify-api-contracts.ts`               | Asserts no `app/api` route handlers + browser-side fetch shapes.         |
 | `web/scripts/verify-local-proxy.ts`                 | Smoke test: fake server + Next rewrites round-trip.                      |
 | `web/scripts/verify-local-fastapi.ts`               | Spawns `server/scripts/run_fake_server.py`, exercises full path.         |
@@ -98,7 +102,7 @@ server/                   # Python FastAPI backend
 
 - **No `web/src/hooks/`** and **no `useAgoraConnection.ts`** — RTC/RTM orchestration lives in `LandingPage.tsx` and `ConversationComponent.tsx`.
 - **No `pyproject.toml`** — Python deps are pip + `requirements.txt`.
-- **No `tests/` directory** — Python verification is `py_compile` plus the bun-spawned smoke scripts.
+- **No root `tests/` directory** — Python tests live in `server/tests/`; TypeScript unit tests are colocated as `*.test.ts` under `web/src/`.
 - **No `Makefile`** — `bun run …` is the canonical entry point.
 - **No `app/api/**/route.ts`** under `web/` — `verify-api-contracts.ts` enforces this.
 

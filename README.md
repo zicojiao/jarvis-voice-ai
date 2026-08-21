@@ -1,6 +1,6 @@
 # JARVIS Voice AI Assistant
 
-An English voice assistant for natural conversation and useful actions. The demo uses Agora Conversational AI for the real-time voice session, a Python OpenAI-compatible tool loop, a Notion task capability, and a Next.js control surface.
+An English voice and text assistant for natural conversation and useful actions. The demo uses Agora Conversational AI for the real-time session, a Python OpenAI-compatible tool loop, a Notion task capability, and a Next.js control surface.
 
 ## Stack
 
@@ -42,12 +42,13 @@ bun run doctor:local
 bun run dev
 ```
 
-Open `http://localhost:3000`, start the voice link, and say: “Create a task in Notion to prepare the launch brief by Friday, high priority.”
+Open `http://localhost:3000` and start the live link. Speak naturally or type into **Message JARVIS**; press Enter to send and Shift+Enter for a new line. Voice and text share the same agent context and capabilities.
 
 ## Verification
 
 ```bash
 bun run verify:backend
+bun run verify:web:unit
 bun run verify:web:api
 bun run verify:web:build
 ```
@@ -73,10 +74,11 @@ Deploy `web/` to Vercel with `AGENT_BACKEND_URL=https://<railway-domain>`.
 ## Runtime flow
 
 1. The browser joins Agora RTC/RTM and asks FastAPI to start an agent.
-2. Agora streams recognized speech to the private OpenAI-compatible endpoint.
-3. The model calls the provider-neutral `create_task` tool when the user requests a task.
-4. FastAPI creates the Notion page and returns a truthful success or failure result.
-5. The assistant speaks the result and the UI displays the recent task with its Notion URL.
+2. Spoken input travels over RTC; typed input uses the Agora client toolkit's `sendText` RTM path.
+3. Agora sends the resulting user message to the private OpenAI-compatible endpoint.
+4. The model calls the provider-neutral `create_task` tool when the user requests a task.
+5. FastAPI creates the Notion page and returns a truthful success or failure result.
+6. The assistant speaks the result and the UI displays the transcript and recent task with its Notion URL.
 
 The OpenAI key, Notion key, Agora certificate, and custom-LLM proxy key are server-only. Tool calls are idempotent by call ID, and Notion failures are never presented as successful writes.
 
