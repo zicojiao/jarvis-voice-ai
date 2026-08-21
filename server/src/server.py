@@ -215,6 +215,15 @@ async def health():
                 ),
                 "enabled_for_agent": bool(os.getenv("CUSTOM_LLM_URL")),
             },
+            "tts": {
+                "configured": bool(os.getenv("FISH_AUDIO_API_KEY")),
+                "vendor": "fishaudio",
+                "reference_id": os.getenv(
+                    "FISH_AUDIO_REFERENCE_ID",
+                    "7c1a7dc37829497593ab4db29eed387c",
+                ),
+                "backend": os.getenv("FISH_AUDIO_BACKEND", "s2.1-pro"),
+            },
             "notion": notion_tasks.status(),
         },
     }

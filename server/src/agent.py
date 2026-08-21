@@ -10,7 +10,7 @@ from typing import Any, Dict, Optional
 
 from agora_agent import Area, AsyncAgora
 from agora_agent.agentkit import Agent as AgoraAgent
-from agora_agent.agentkit.vendors import DeepgramSTT, MiniMaxTTS, OpenAI
+from agora_agent.agentkit.vendors import DeepgramSTT, FishAudioTTS, OpenAI
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -20,6 +20,9 @@ Your primary job is task capture. When the user asks to add, create, save, remem
 
 Never claim a task was created unless the tool result says ok=true. If the tool reports an error, state the problem plainly and suggest the exact missing setup or retry. After a successful tool call, confirm the task title in one short sentence. Keep all spoken responses concise and natural.
 """
+
+FISH_AUDIO_REFERENCE_ID = "7c1a7dc37829497593ab4db29eed387c"
+FISH_AUDIO_BACKEND = "s2.1-pro"
 
 
 class Agent:
@@ -71,6 +74,19 @@ class Agent:
         custom_llm_url = os.getenv("CUSTOM_LLM_URL", "").strip()
         custom_llm_proxy_key = os.getenv("CUSTOM_LLM_PROXY_KEY", "").strip()
         llm_model = os.getenv("LLM_MODEL", "gpt-4o-mini")
+        fish_audio_key = os.getenv("FISH_AUDIO_API_KEY", "").strip()
+        fish_audio_reference_id = os.getenv(
+            "FISH_AUDIO_REFERENCE_ID", FISH_AUDIO_REFERENCE_ID
+        ).strip()
+        fish_audio_backend = os.getenv(
+            "FISH_AUDIO_BACKEND", FISH_AUDIO_BACKEND
+        ).strip()
+        if not fish_audio_key:
+            raise ValueError("FISH_AUDIO_API_KEY is required")
+        if not fish_audio_reference_id:
+            raise ValueError("FISH_AUDIO_REFERENCE_ID is required")
+        if not fish_audio_backend:
+            raise ValueError("FISH_AUDIO_BACKEND is required")
         if custom_llm_url:
             if not custom_llm_proxy_key:
                 raise ValueError(
@@ -99,7 +115,11 @@ class Agent:
                 top_p=0.9,
             )
         stt = DeepgramSTT(model="nova-3", language="en")
-        tts = MiniMaxTTS(model="speech_2_6_turbo", voice_id="English_captivating_female1")
+        tts = FishAudioTTS(
+            key=fish_audio_key,
+            reference_id=fish_audio_reference_id,
+            backend=fish_audio_backend,
+        )
 
         # Optional BYOK example: replace the STT block above and set DEEPGRAM_API_KEY.
         # stt = DeepgramSTT(api_key=os.getenv("DEEPGRAM_API_KEY"), model="nova-3", language="en")
@@ -114,14 +134,6 @@ class Agent:
         #     max_tokens=1024,
         #     temperature=0.7,
         #     top_p=0.95,
-        # )
-
-        # Optional BYOK example: replace the TTS block above and set ELEVENLABS_API_KEY.
-        # from agora_agent.agentkit.vendors import ElevenLabsTTS
-        # tts = ElevenLabsTTS(
-        #     key=os.getenv("ELEVENLABS_API_KEY"),
-        #     model_id="eleven_flash_v2_5",
-        #     voice_id=os.getenv("ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB"),
         # )
 
         parameters = {

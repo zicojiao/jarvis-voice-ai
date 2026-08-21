@@ -19,6 +19,7 @@ if _SERVER_SRC not in sys.path:
 FAKE_ENV = {
     "AGORA_APP_ID": "0123456789abcdef0123456789abcdef",
     "AGORA_APP_CERTIFICATE": "fedcba9876543210fedcba9876543210",
+    "FISH_AUDIO_API_KEY": "fish-test-key",
 }
 
 
@@ -38,6 +39,8 @@ def fake_env(monkeypatch):
         "NOTION_API_KEY",
         "NOTION_TOKEN",
         "NOTION_DATA_SOURCE_ID",
+        "FISH_AUDIO_REFERENCE_ID",
+        "FISH_AUDIO_BACKEND",
     ]:
         monkeypatch.delenv(key, raising=False)
     return dict(FAKE_ENV)

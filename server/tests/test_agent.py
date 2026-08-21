@@ -40,6 +40,7 @@ def test_start_wires_managed_openai_and_returns_shape(fake_env, monkeypatch):
 
     def fake_create_async_session(self, **kwargs):
         captured["llm"] = self.llm
+        captured["tts"] = self.tts
         captured["channel"] = kwargs.get("channel")
         captured["remote_uids"] = kwargs.get("remote_uids")
         return FakeSession()
@@ -61,6 +62,14 @@ def test_start_wires_managed_openai_and_returns_shape(fake_env, monkeypatch):
     assert captured["llm"]["params"]["model"] == "gpt-4o-mini"
     assert captured["llm"]["style"] == "openai"
     assert "vendor" not in captured["llm"]  # managed OpenAI has no custom vendor key
+    assert captured["tts"] == {
+        "vendor": "fishaudio",
+        "params": {
+            "api_key": "fish-test-key",
+            "reference_id": "7c1a7dc37829497593ab4db29eed387c",
+            "backend": "s2.1-pro",
+        },
+    }
     assert captured["channel"] == "ch"
     assert captured["remote_uids"] == ["222"]
 
@@ -88,6 +97,30 @@ def test_start_wires_custom_llm_without_exposing_upstream_key(fake_env, monkeypa
     assert captured["llm"]["url"] == "https://backend.example/chat/completions"
     assert captured["llm"]["api_key"] == "proxy-secret"
     assert "upstream-secret" not in str(captured["llm"])
+
+
+def test_start_uses_fish_audio_env_overrides(fake_env, monkeypatch):
+    monkeypatch.setenv("FISH_AUDIO_REFERENCE_ID", "custom-reference")
+    monkeypatch.setenv("FISH_AUDIO_BACKEND", "speech-1.5")
+    agent = _fresh_agent_module()
+    captured = {}
+
+    class FakeSession:
+        async def start(self):
+            return "fish-agent-id"
+
+    def fake_create_async_session(self, **kwargs):
+        captured["tts"] = self.tts
+        return FakeSession()
+
+    from agora_agent.agentkit import Agent as AgoraAgent
+
+    monkeypatch.setattr(AgoraAgent, "create_async_session", fake_create_async_session)
+    asyncio.run(agent.Agent().start(channel_name="ch", agent_uid=111, user_uid=222))
+
+    assert captured["tts"]["vendor"] == "fishaudio"
+    assert captured["tts"]["params"]["reference_id"] == "custom-reference"
+    assert captured["tts"]["params"]["backend"] == "speech-1.5"
 
 
 def test_start_validates_arguments(fake_env, monkeypatch):

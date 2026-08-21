@@ -24,7 +24,7 @@ Edit `server/src/agent.py`:
 - **VAD:** edit `turn_detection` dict (start/end mode, speech threshold, silence/interrupt durations).
 - **LLM:** change the `OpenAI(...)` constructor (model, history, BYOK key, base URL).
 - **STT:** change the `DeepgramSTT(...)` constructor.
-- **TTS:** change the `MiniMaxTTS(...)` constructor (`model`, `voice_id`).
+- **TTS:** change the `FishAudioTTS(...)` constructor or `FISH_AUDIO_REFERENCE_ID` / `FISH_AUDIO_BACKEND`.
 - **Agent parameters:** edit `AgoraAgent(parameters=...)` and `advanced_features` for server-side RTM data channel, error messages, metrics, and tool flags.
 - **Session:** edit `create_async_session(...)` parameters (`idle_timeout`, `expires_in`, `enable_string_uid`).
 

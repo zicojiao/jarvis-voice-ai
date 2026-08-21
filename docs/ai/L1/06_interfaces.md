@@ -40,6 +40,7 @@ CORS middleware reads comma-separated `CORS_ORIGINS` and disables credentials.
 | Scope                  | Variable                                  |
 | ---------------------- | ----------------------------------------- |
 | Python server (required) | `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE` |
+| Python server (TTS) | `FISH_AUDIO_API_KEY`, `FISH_AUDIO_REFERENCE_ID`, `FISH_AUDIO_BACKEND` |
 | Python server (optional) | `AGENT_GREETING`, `PORT`                 |
 | Python server (tool path) | `CUSTOM_LLM_URL`, `CUSTOM_LLM_PROXY_KEY`, `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`, `NOTION_API_KEY`, `NOTION_DATA_SOURCE_ID`, `NOTION_TITLE_PROPERTY` |
 | Next build             | `AGENT_BACKEND_URL`                       |
@@ -76,8 +77,9 @@ agent = (
     AgoraAgent(...)
     .with_stt(DeepgramSTT(model="nova-3", language="en"))
     .with_llm(OpenAI(model="gpt-4o-mini", ...))
-    .with_tts(MiniMaxTTS(model="speech_2_6_turbo",
-                          voice_id="English_captivating_female1"))
+    .with_tts(FishAudioTTS(key=os.environ["FISH_AUDIO_API_KEY"],
+                           reference_id="7c1a7dc37829497593ab4db29eed387c",
+                           backend="s2.1-pro"))
 )
 
 session = agora_agent.create_async_session(

@@ -9,7 +9,8 @@ Browser
                                         ├─ agent lifecycle and tokens
 Agora Conversational AI ────────────────> private /chat/completions
                                         ├─ OpenAI API
-                                        └─ Notion REST API
+                                        ├─ Notion REST API
+                                        └─ Fish Audio TTS
 ```
 
 The Vercel-hosted Next.js app owns presentation and browser-facing `/api/*` URLs. Its rewrites forward lifecycle, health, and recent-task requests to FastAPI through `AGENT_BACKEND_URL`.
@@ -24,6 +25,7 @@ FastAPI owns all secrets, Agora session creation, the OpenAI-compatible streamin
 4. The custom LLM streams model output and executes `create_notion_task` when requested.
 5. `NotionTaskService` creates a page under `NOTION_DATA_SOURCE_ID` using Notion API version `2025-09-03`.
 6. The result is spoken over Agora and exposed by `GET /api/tasks/recent` for the UI.
+   Speech synthesis uses Fish Audio voice model `7c1a7dc37829497593ab4db29eed387c`.
 7. `POST /api/stopAgent` stops the cloud agent session.
 
 If `CUSTOM_LLM_URL` is absent, the original Agora-managed LLM remains available. If Notion is unconfigured or rejects a write, the tool returns an explicit failure and the assistant must not claim success.

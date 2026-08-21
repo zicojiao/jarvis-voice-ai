@@ -65,6 +65,12 @@ def test_health_and_recent_tasks_do_not_expose_secrets(client):
     body = health.json()
     assert body["status"] == "ok"
     assert body["services"]["agora"]["configured"] is True
+    assert body["services"]["tts"] == {
+        "configured": True,
+        "vendor": "fishaudio",
+        "reference_id": "7c1a7dc37829497593ab4db29eed387c",
+        "backend": "s2.1-pro",
+    }
     assert "API_KEY" not in str(body)
 
     tasks = client.get("/tasks/recent")

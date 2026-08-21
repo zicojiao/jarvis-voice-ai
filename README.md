@@ -25,6 +25,9 @@ Add the remaining server-only values to `server/.env.local`:
 LLM_API_KEY=...
 CUSTOM_LLM_PROXY_KEY=...
 CUSTOM_LLM_URL=http://localhost:8000/chat/completions
+FISH_AUDIO_API_KEY=...
+FISH_AUDIO_REFERENCE_ID=7c1a7dc37829497593ab4db29eed387c
+FISH_AUDIO_BACKEND=s2.1-pro
 NOTION_API_KEY=...
 NOTION_DATA_SOURCE_ID=...
 ```
@@ -56,6 +59,9 @@ Railway builds the root `Dockerfile`. Configure these variables on the backend s
 - `LLM_API_KEY`, `LLM_MODEL`, and optional `LLM_BASE_URL`
 - `CUSTOM_LLM_PROXY_KEY`
 - `CUSTOM_LLM_URL=https://<railway-domain>/chat/completions`
+- `FISH_AUDIO_API_KEY`
+- `FISH_AUDIO_REFERENCE_ID=7c1a7dc37829497593ab4db29eed387c`
+- `FISH_AUDIO_BACKEND=s2.1-pro`
 - `NOTION_API_KEY` and `NOTION_DATA_SOURCE_ID`
 - optional `NOTION_TITLE_PROPERTY` (default: `Name`)
 
