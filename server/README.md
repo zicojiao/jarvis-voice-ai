@@ -76,7 +76,7 @@ agora project use my-first-voice-agent
 agora project env write .env.local
 ```
 
-**Note**: The service uses Token007 authentication generated from `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE`. Third-party vendor keys are not required in this default managed setup. The current default chain matches the Next.js quickstart: `DeepgramSTT` (`nova-3`) + `OpenAI` (`gpt-4o-mini`) + `MiniMaxTTS` (`speech_2_6_turbo` / `English_captivating_female1`). The FastAPI sample now uses `AsyncAgora` so the request path matches the local Agora guidance for async frameworks.
+**Note**: The service uses Token007 authentication generated from `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE`. The deployed task-agent chain is managed Deepgram STT, a private OpenAI-compatible Zhipu GLM tool loop, and Fish Audio TTS. Set `LLM_THINKING_TYPE=disabled` for the low-latency GLM voice path. The FastAPI sample uses `AsyncAgora` so the request path matches the local Agora guidance for async frameworks.
 
 ### 2. Install Dependencies
 
@@ -144,6 +144,6 @@ The repo-level `bun run verify:local:fastapi` check exercises this FastAPI app t
 This project uses `agora-agents` (import `agora_agent`):
 - Package: `agora_agent`
 - Agent builder: `agora_agent.agentkit.Agent` with fluent `.with_llm()` / `.with_tts()` / `.with_stt()` API
-- Default vendors: `DeepgramSTT`, `OpenAI`, `MiniMaxTTS` from `agora_agent.agentkit.vendors`
+- Current vendors: `DeepgramSTT`, custom OpenAI-compatible GLM, and `FishAudioTTS`
 - Optional BYOK examples in `src/agent.py`: `DeepgramSTT`, `OpenAI(api_key=...)`, `ElevenLabsTTS`
 - Token: `agora_agent.agentkit.token.generate_convo_ai_token`

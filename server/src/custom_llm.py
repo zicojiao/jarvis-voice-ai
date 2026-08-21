@@ -170,6 +170,9 @@ def _completion_options(
         options["temperature"] = request.temperature
     if request.max_tokens is not None:
         options["max_tokens"] = request.max_tokens
+    thinking_type = os.getenv("LLM_THINKING_TYPE", "").strip()
+    if thinking_type:
+        options["extra_body"] = {"thinking": {"type": thinking_type}}
     return options
 
 

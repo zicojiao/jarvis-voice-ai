@@ -23,6 +23,23 @@ def test_notion_tool_is_always_available(fake_env):
     assert names == ["create_notion_task"]
 
 
+def test_completion_options_forward_provider_thinking_mode(fake_env, monkeypatch):
+    monkeypatch.setenv("LLM_MODEL", "glm-4.5-flash")
+    monkeypatch.setenv("LLM_THINKING_TYPE", "disabled")
+    request = custom_llm.ChatCompletionRequest(
+        messages=[{"role": "user", "content": "Add a task"}]
+    )
+
+    options = custom_llm._completion_options(
+        request,
+        request.messages,
+        custom_llm._tools_for_request(request),
+    )
+
+    assert options["model"] == "glm-4.5-flash"
+    assert options["extra_body"] == {"thinking": {"type": "disabled"}}
+
+
 def test_execute_tool_passes_context_and_call_id(fake_env, monkeypatch):
     captured = {}
 

@@ -6,7 +6,7 @@ An English voice assistant that turns spoken requests into real Notion tasks. Th
 
 - Next.js 16, React 19, and Agora RTC/RTM in `web/`
 - FastAPI and Agora Agent Server SDK in `server/`
-- OpenAI tool calling through the private `/chat/completions` endpoint
+- Zhipu GLM tool calling through the private OpenAI-compatible `/chat/completions` endpoint
 - Notion REST API `2025-09-03` with a data-source parent
 - Railway backend and Vercel frontend
 
@@ -23,6 +23,9 @@ Add the remaining server-only values to `server/.env.local`:
 
 ```bash
 LLM_API_KEY=...
+LLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+LLM_MODEL=glm-4.5-flash
+LLM_THINKING_TYPE=disabled
 CUSTOM_LLM_PROXY_KEY=...
 CUSTOM_LLM_URL=http://localhost:8000/chat/completions
 FISH_AUDIO_API_KEY=...
@@ -56,7 +59,7 @@ The backend tests mock Agora, OpenAI, and Notion boundaries; no paid cloud call 
 Railway builds the root `Dockerfile`. Configure these variables on the backend service:
 
 - `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE`
-- `LLM_API_KEY`, `LLM_MODEL`, and optional `LLM_BASE_URL`
+- `LLM_API_KEY`, `LLM_MODEL`, `LLM_BASE_URL`, and optional `LLM_THINKING_TYPE`
 - `CUSTOM_LLM_PROXY_KEY`
 - `CUSTOM_LLM_URL=https://<railway-domain>/chat/completions`
 - `FISH_AUDIO_API_KEY`

@@ -42,7 +42,7 @@ CORS middleware reads comma-separated `CORS_ORIGINS` and disables credentials.
 | Python server (required) | `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE` |
 | Python server (TTS) | `FISH_AUDIO_API_KEY`, `FISH_AUDIO_REFERENCE_ID`, `FISH_AUDIO_BACKEND` |
 | Python server (optional) | `AGENT_GREETING`, `PORT`                 |
-| Python server (tool path) | `CUSTOM_LLM_URL`, `CUSTOM_LLM_PROXY_KEY`, `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`, `NOTION_API_KEY`, `NOTION_DATA_SOURCE_ID`, `NOTION_TITLE_PROPERTY` |
+| Python server (tool path) | `CUSTOM_LLM_URL`, `CUSTOM_LLM_PROXY_KEY`, `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`, `LLM_THINKING_TYPE`, `NOTION_API_KEY`, `NOTION_DATA_SOURCE_ID`, `NOTION_TITLE_PROPERTY` |
 | Next build             | `AGENT_BACKEND_URL`                       |
 | Browser                | `NEXT_PUBLIC_AGENT_UID` (optional)        |
 

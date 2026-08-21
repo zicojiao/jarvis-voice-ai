@@ -16,7 +16,7 @@
          │      │ RTM data                                                   │ HTTPS
          │ RTC  │                                                            ▼
          ▼      ▼                                                Agora Conversational AI
-   Agora media + RTM cloud                                       (managed STT/LLM + Fish Audio TTS)
+   Agora media + RTM cloud                                       (managed STT + custom GLM + Fish Audio TTS)
 ```
 
 ## Voice Session Lifecycle
@@ -75,7 +75,7 @@ If `AGENT_BACKEND_URL` is unset/empty, **no rewrites register** — the client c
 | Stage | Vendor       | Config highlights                                                          |
 | ----- | ------------ | -------------------------------------------------------------------------- |
 | STT   | `DeepgramSTT`| `model="nova-3"`, `language="en"`                                           |
-| LLM   | `OpenAI`     | `model="gpt-4o-mini"`, greeting/failure overrides, history settings        |
+| LLM   | Custom OpenAI-compatible | Zhipu `glm-4.5-flash` through FastAPI, thinking disabled for latency |
 | TTS   | `FishAudioTTS` | `reference_id="7c1a7dc37829497593ab4db29eed387c"`, `backend="s2.1-pro"` |
 | VAD   | Agora        | Tunable `turn_detection` dict with start/end mode and timing thresholds    |
 

@@ -8,14 +8,14 @@ Browser
   └─ Next.js /api/* ─────────────> FastAPI on Railway
                                         ├─ agent lifecycle and tokens
 Agora Conversational AI ────────────────> private /chat/completions
-                                        ├─ OpenAI API
+                                        ├─ Zhipu GLM API
                                         ├─ Notion REST API
                                         └─ Fish Audio TTS
 ```
 
 The Vercel-hosted Next.js app owns presentation and browser-facing `/api/*` URLs. Its rewrites forward lifecycle, health, and recent-task requests to FastAPI through `AGENT_BACKEND_URL`.
 
-FastAPI owns all secrets, Agora session creation, the OpenAI-compatible streaming endpoint, tool execution, and the recent-task view. The browser never receives provider credentials.
+FastAPI owns all secrets, Agora session creation, the OpenAI-compatible streaming endpoint, tool execution, and the recent-task view. The production endpoint uses Zhipu GLM with thinking disabled for lower voice latency. The browser never receives provider credentials.
 
 ## Conversation lifecycle
 
@@ -44,7 +44,7 @@ If `CUSTOM_LLM_URL` is absent, the original Agora-managed LLM remains available.
 ## Security and correctness invariants
 
 - Provider keys and the Agora certificate remain backend-only.
-- `/chat/completions` requires a separate proxy bearer key; the upstream OpenAI key is never given to Agora.
+- `/chat/completions` requires a separate proxy bearer key; the upstream model key is never given to Agora.
 - Notion tool executions are idempotent by `tool_call_id` within the server process.
 - The Notion page title is the only schema-dependent property; details, due date, and priority are written as page content.
 - CORS is restricted by `CORS_ORIGINS` when configured.
