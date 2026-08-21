@@ -32,6 +32,8 @@ FastAPI owns all secrets, Agora session creation, the OpenAI-compatible streamin
 
 If `CUSTOM_LLM_URL` is absent, the original Agora-managed LLM remains available. If Notion is unconfigured or rejects a write, the tool returns an explicit failure and the assistant must not claim success.
 
+For task writes, the custom LLM performs one model pass to extract the structured tool arguments, executes the task service, then streams a deterministic confirmation directly. Avoiding a second model pass reduces tool-response latency and removes a provider-specific failure point. Spoken output is capped by `LLM_MAX_TOKENS`, and request timing logs separate upstream first-content latency from tool latency.
+
 ## Backend endpoints
 
 | Endpoint | Method | Responsibility |

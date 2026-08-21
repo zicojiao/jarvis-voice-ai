@@ -38,6 +38,8 @@ def fake_env(monkeypatch):
         "LLM_BASE_URL",
         "LLM_MODEL",
         "LLM_THINKING_TYPE",
+        "LLM_MAX_HISTORY",
+        "LLM_MAX_TOKENS",
         "OPENAI_API_KEY",
         "NOTION_API_KEY",
         "NOTION_TOKEN",

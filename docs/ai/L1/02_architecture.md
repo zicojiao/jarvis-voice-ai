@@ -87,6 +87,7 @@ Agent parameters: `data_channel="rtm"`, `enable_error_message=True`, `enable_met
 - Python backend gives Python developers a familiar host for Conversational AI integration.
 - Next.js rewrites hide backend placement from the browser — `/api/*` is the only URL the client knows.
 - Single repo keeps web and backend changes reviewable together while preserving deploy separation.
+- Task writes short-circuit after the tool result: FastAPI emits a brief OpenAI-compatible SSE confirmation instead of paying for a second upstream LLM pass.
 
 ## Related Deep Dives
 

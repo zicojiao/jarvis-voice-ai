@@ -7,6 +7,8 @@ import hmac
 import json
 import logging
 import os
+import time
+import uuid
 from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException
@@ -159,21 +161,63 @@ def _upstream_client() -> AsyncOpenAI:
 def _completion_options(
     request: ChatCompletionRequest, messages: list[dict[str, Any]], tools: list[dict[str, Any]]
 ) -> dict[str, Any]:
+    configured_max_tokens = max(32, int(os.getenv("LLM_MAX_TOKENS", "256")))
+    requested_max_tokens = request.max_tokens or configured_max_tokens
     options: dict[str, Any] = {
         "model": os.getenv("LLM_MODEL", "gpt-4o-mini"),
         "messages": messages,
         "tools": tools,
         "tool_choice": request.tool_choice or "auto",
         "parallel_tool_calls": request.parallel_tool_calls,
+        "max_tokens": min(requested_max_tokens, configured_max_tokens),
     }
     if request.temperature is not None:
         options["temperature"] = request.temperature
-    if request.max_tokens is not None:
-        options["max_tokens"] = request.max_tokens
     thinking_type = os.getenv("LLM_THINKING_TYPE", "").strip()
     if thinking_type:
         options["extra_body"] = {"thinking": {"type": thinking_type}}
     return options
+
+
+def _direct_tool_confirmation(tool_results: list[dict[str, Any]]) -> str | None:
+    """Turn our single task result into the short spoken answer without a second LLM call."""
+    if len(tool_results) != 1:
+        return None
+    result = tool_results[0]
+    if result.get("name") not in {"create_task", "create_notion_task"}:
+        return None
+    try:
+        payload = json.loads(result.get("content") or "{}")
+    except (TypeError, json.JSONDecodeError):
+        return None
+
+    if payload.get("ok") is True:
+        title = str((payload.get("task") or {}).get("title") or "the task")
+        return f'Done — I added "{title}" to your tasks.'
+    error = str(payload.get("error") or "the task service rejected the request")
+    return f"I couldn't create that task: {error}"
+
+
+def _completion_chunk(
+    *, content: str | None, finish_reason: str | None, completion_id: str
+) -> str:
+    delta: dict[str, Any] = {}
+    if content is not None:
+        delta = {"role": "assistant", "content": content}
+    payload = {
+        "id": completion_id,
+        "object": "chat.completion.chunk",
+        "created": int(time.time()),
+        "model": os.getenv("LLM_MODEL", "gpt-4o-mini"),
+        "choices": [
+            {
+                "index": 0,
+                "delta": delta,
+                "finish_reason": finish_reason,
+            }
+        ],
+    }
+    return f"data: {json.dumps(payload)}\n\n"
 
 
 @router.post("/chat/completions")
@@ -181,11 +225,21 @@ async def chat_completions(
     request: ChatCompletionRequest,
     authorization: str | None = Header(default=None),
 ):
+    request_id = uuid.uuid4().hex[:8]
+    request_started = time.perf_counter()
     _require_proxy_auth(authorization)
     client = _upstream_client()
     tools = _tools_for_request(request)
     context = request.context or {}
     messages = list(request.messages)
+    logger.info(
+        "Custom LLM request id=%s model=%s messages=%s tools=%s stream=%s",
+        request_id,
+        os.getenv("LLM_MODEL", "gpt-4o-mini"),
+        len(messages),
+        len(tools),
+        request.stream,
+    )
 
     if not request.stream:
         response = None
@@ -209,16 +263,33 @@ async def chat_completions(
 
     async def generate():
         current_messages = list(messages)
-        for _ in range(5):
+        for pass_index in range(5):
+            pass_started = time.perf_counter()
             stream = await client.chat.completions.create(
                 **_completion_options(request, current_messages, tools), stream=True
+            )
+            logger.info(
+                "Custom LLM upstream open id=%s pass=%s elapsed_ms=%s",
+                request_id,
+                pass_index + 1,
+                round((time.perf_counter() - pass_started) * 1000),
             )
             accumulated_calls: list[dict[str, Any]] = []
             accumulated_content = ""
             finish_reason = None
+            first_chunk_logged = False
+            first_content_logged = False
 
             try:
                 async for chunk in stream:
+                    if not first_chunk_logged:
+                        first_chunk_logged = True
+                        logger.info(
+                            "Custom LLM first chunk id=%s pass=%s elapsed_ms=%s",
+                            request_id,
+                            pass_index + 1,
+                            round((time.perf_counter() - request_started) * 1000),
+                        )
                     choice = chunk.choices[0] if chunk.choices else None
                     delta = choice.delta if choice else None
                     finish_reason = choice.finish_reason if choice else finish_reason
@@ -229,6 +300,14 @@ async def chat_completions(
                         )
                         continue
                     if delta and delta.content:
+                        if not first_content_logged:
+                            first_content_logged = True
+                            logger.info(
+                                "Custom LLM first content id=%s pass=%s elapsed_ms=%s",
+                                request_id,
+                                pass_index + 1,
+                                round((time.perf_counter() - request_started) * 1000),
+                            )
                         accumulated_content += delta.content
                     yield f"data: {json.dumps(chunk.model_dump())}\n\n"
             except asyncio.CancelledError:
@@ -243,10 +322,44 @@ async def chat_completions(
                         "tool_calls": accumulated_calls,
                     }
                 )
-                current_messages.extend(await _execute_tools(accumulated_calls, context))
+                tool_started = time.perf_counter()
+                tool_results = await _execute_tools(accumulated_calls, context)
+                logger.info(
+                    "Custom LLM tools complete id=%s count=%s elapsed_ms=%s total_ms=%s",
+                    request_id,
+                    len(tool_results),
+                    round((time.perf_counter() - tool_started) * 1000),
+                    round((time.perf_counter() - request_started) * 1000),
+                )
+                confirmation = _direct_tool_confirmation(tool_results)
+                if confirmation is not None:
+                    completion_id = f"chatcmpl-tool-{request_id}"
+                    yield _completion_chunk(
+                        content=confirmation,
+                        finish_reason=None,
+                        completion_id=completion_id,
+                    )
+                    yield _completion_chunk(
+                        content=None,
+                        finish_reason="stop",
+                        completion_id=completion_id,
+                    )
+                    yield "data: [DONE]\n\n"
+                    logger.info(
+                        "Custom LLM direct tool response id=%s total_ms=%s",
+                        request_id,
+                        round((time.perf_counter() - request_started) * 1000),
+                    )
+                    return
+                current_messages.extend(tool_results)
                 continue
 
             yield "data: [DONE]\n\n"
+            logger.info(
+                "Custom LLM response complete id=%s total_ms=%s",
+                request_id,
+                round((time.perf_counter() - request_started) * 1000),
+            )
             return
         yield "data: [DONE]\n\n"
 

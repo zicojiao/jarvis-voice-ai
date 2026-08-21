@@ -26,6 +26,8 @@ LLM_API_KEY=...
 LLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
 LLM_MODEL=glm-4.5-flash
 LLM_THINKING_TYPE=disabled
+LLM_MAX_HISTORY=8
+LLM_MAX_TOKENS=256
 CUSTOM_LLM_PROXY_KEY=...
 CUSTOM_LLM_URL=http://localhost:8000/chat/completions
 FISH_AUDIO_API_KEY=...
@@ -60,7 +62,7 @@ The backend tests mock Agora, OpenAI, and Notion boundaries; no paid cloud call 
 Railway builds the root `Dockerfile`. Configure these variables on the backend service:
 
 - `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE`
-- `LLM_API_KEY`, `LLM_MODEL`, `LLM_BASE_URL`, and optional `LLM_THINKING_TYPE`
+- `LLM_API_KEY`, `LLM_MODEL`, `LLM_BASE_URL`, and optional `LLM_THINKING_TYPE`, `LLM_MAX_HISTORY`, and `LLM_MAX_TOKENS`
 - `CUSTOM_LLM_PROXY_KEY`
 - `CUSTOM_LLM_URL=https://<railway-domain>/chat/completions`
 - `FISH_AUDIO_API_KEY`

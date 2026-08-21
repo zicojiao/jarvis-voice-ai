@@ -74,6 +74,8 @@ class Agent:
         custom_llm_url = os.getenv("CUSTOM_LLM_URL", "").strip()
         custom_llm_proxy_key = os.getenv("CUSTOM_LLM_PROXY_KEY", "").strip()
         llm_model = os.getenv("LLM_MODEL", "gpt-4o-mini")
+        llm_max_history = max(2, int(os.getenv("LLM_MAX_HISTORY", "8")))
+        llm_max_tokens = max(32, int(os.getenv("LLM_MAX_TOKENS", "256")))
         fish_audio_key = os.getenv("FISH_AUDIO_API_KEY", "").strip()
         fish_audio_reference_id = os.getenv(
             "FISH_AUDIO_REFERENCE_ID", FISH_AUDIO_REFERENCE_ID
@@ -98,8 +100,8 @@ class Agent:
                 model=llm_model,
                 greeting_message=self.greeting,
                 failure_message="The assistant is temporarily unavailable.",
-                max_history=15,
-                max_tokens=1024,
+                max_history=llm_max_history,
+                max_tokens=llm_max_tokens,
                 temperature=0.3,
                 top_p=0.9,
             )
@@ -109,8 +111,8 @@ class Agent:
                 model="gpt-4o-mini",
                 greeting_message=self.greeting,
                 failure_message="Please wait a moment.",
-                max_history=15,
-                max_tokens=1024,
+                max_history=llm_max_history,
+                max_tokens=llm_max_tokens,
                 temperature=0.3,
                 top_p=0.9,
             )
@@ -150,7 +152,7 @@ class Agent:
             instructions=JARVIS_PROMPT,
             greeting=self.greeting,
             failure_message="Please wait a moment.",
-            max_history=50,
+            max_history=llm_max_history,
             turn_detection={
                 "config": {
                     "speech_threshold": 0.5,

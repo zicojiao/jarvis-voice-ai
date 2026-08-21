@@ -1,5 +1,6 @@
 import asyncio
 import json
+from types import SimpleNamespace
 
 import pytest
 from fastapi import HTTPException
@@ -38,6 +39,160 @@ def test_completion_options_forward_provider_thinking_mode(fake_env, monkeypatch
 
     assert options["model"] == "glm-4.5-flash"
     assert options["extra_body"] == {"thinking": {"type": "disabled"}}
+    assert options["max_tokens"] == 256
+
+
+def test_completion_options_cap_requested_tokens(fake_env, monkeypatch):
+    monkeypatch.setenv("LLM_MAX_TOKENS", "128")
+    request = custom_llm.ChatCompletionRequest(
+        messages=[{"role": "user", "content": "Explain this"}], max_tokens=1024
+    )
+
+    options = custom_llm._completion_options(
+        request, request.messages, custom_llm._tools_for_request(request)
+    )
+
+    assert options["max_tokens"] == 128
+
+
+def test_direct_tool_confirmation_skips_second_model_pass(fake_env):
+    success = custom_llm._direct_tool_confirmation(
+        [
+            {
+                "name": "create_task",
+                "content": json.dumps(
+                    {"ok": True, "task": {"title": "Prepare the demo"}}
+                ),
+            }
+        ]
+    )
+    failure = custom_llm._direct_tool_confirmation(
+        [
+            {
+                "name": "create_task",
+                "content": json.dumps({"ok": False, "error": "Not configured"}),
+            }
+        ]
+    )
+
+    assert success == 'Done — I added "Prepare the demo" to your tasks.'
+    assert failure == "I couldn't create that task: Not configured"
+
+
+def test_completion_chunk_is_openai_compatible(fake_env):
+    event = custom_llm._completion_chunk(
+        content="Done.", finish_reason=None, completion_id="chatcmpl-test"
+    )
+    payload = json.loads(event.removeprefix("data: "))
+
+    assert payload["object"] == "chat.completion.chunk"
+    assert payload["choices"][0]["delta"]["content"] == "Done."
+
+
+def test_streaming_tool_result_returns_without_second_upstream_pass(
+    fake_env, monkeypatch
+):
+    upstream_calls = []
+
+    class FakeToolDelta:
+        def model_dump(self):
+            return {
+                "index": 0,
+                "id": "call-fast",
+                "type": "function",
+                "function": {
+                    "name": "create_task",
+                    "arguments": '{"title":"Fast task"}',
+                },
+            }
+
+    class FakeStream:
+        def __init__(self):
+            self.chunks = iter(
+                [
+                    SimpleNamespace(
+                        choices=[
+                            SimpleNamespace(
+                                delta=SimpleNamespace(
+                                    tool_calls=[FakeToolDelta()], content=None
+                                ),
+                                finish_reason=None,
+                            )
+                        ],
+                        model_dump=lambda: {"choices": []},
+                    ),
+                    SimpleNamespace(
+                        choices=[
+                            SimpleNamespace(
+                                delta=SimpleNamespace(tool_calls=None, content=None),
+                                finish_reason="tool_calls",
+                            )
+                        ],
+                        model_dump=lambda: {"choices": []},
+                    ),
+                ]
+            )
+
+        def __aiter__(self):
+            return self
+
+        async def __anext__(self):
+            try:
+                return next(self.chunks)
+            except StopIteration as exc:
+                raise StopAsyncIteration from exc
+
+    class FakeCompletions:
+        async def create(self, **kwargs):
+            upstream_calls.append(kwargs)
+            return FakeStream()
+
+    async def fake_execute_tools(tool_calls, context):
+        return [
+            {
+                "role": "tool",
+                "tool_call_id": "call-fast",
+                "name": "create_task",
+                "content": json.dumps(
+                    {"ok": True, "task": {"title": "Fast task"}}
+                ),
+            }
+        ]
+
+    monkeypatch.setattr(
+        custom_llm,
+        "_upstream_client",
+        lambda: SimpleNamespace(
+            chat=SimpleNamespace(completions=FakeCompletions())
+        ),
+    )
+    monkeypatch.setattr(custom_llm, "_execute_tools", fake_execute_tools)
+
+    async def run():
+        response = await custom_llm.chat_completions(
+            custom_llm.ChatCompletionRequest(
+                messages=[{"role": "user", "content": "Add fast task"}]
+            )
+        )
+        parts = []
+        async for part in response.body_iterator:
+            parts.append(part.decode() if isinstance(part, bytes) else part)
+        return "".join(parts)
+
+    body = asyncio.run(run())
+    events = [
+        json.loads(line.removeprefix("data: "))
+        for line in body.splitlines()
+        if line.startswith("data: {")
+    ]
+    response_events = [event for event in events if event.get("choices")]
+
+    assert len(upstream_calls) == 1
+    assert response_events[0]["choices"][0]["delta"]["content"] == (
+        'Done — I added "Fast task" to your tasks.'
+    )
+    assert response_events[1]["choices"][0]["finish_reason"] == "stop"
+    assert body.endswith("data: [DONE]\n\n")
 
 
 def test_execute_tool_passes_context_and_call_id(fake_env, monkeypatch):
