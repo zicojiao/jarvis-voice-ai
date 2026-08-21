@@ -18,22 +18,17 @@ export function QuickstartPreCallCard({
 	return (
 		<div className="jarvis-launch-grid mx-auto w-[min(94vw,68rem)] animate-fade-up text-left">
 			<div className="jarvis-launch-copy">
-				<div className="jarvis-eyebrow"><span /> Agora Conversational AI demo</div>
-				<p className="jarvis-serial">MARK // 01 · TASK OPERATIONS</p>
-				<h1>Voice in.<br /><em>Work logged.</em></h1>
+				<div className="jarvis-eyebrow"><span /> J.A.R.V.I.S. voice task interface</div>
+				<p className="jarvis-serial">AGORA RTC · FISH AUDIO · NOTION</p>
+				<h1>Speak it.<br /><em>It&apos;s in Notion.</em></h1>
 				<p className="jarvis-intro">
-					A real-time voice assistant that turns a spoken instruction into a live Notion task—then confirms it out loud.
+					Give J.A.R.V.I.S. an instruction. It creates the task, files it in Notion, and reports back without breaking the conversation.
 				</p>
-
-				<div className="jarvis-example">
-					<span>Try saying</span>
-					<strong>“Add prepare the KOL demo to my Notion tasks.”</strong>
-				</div>
 
 				<Button
 					onClick={onStartConversation}
 					disabled={isLoading}
-					className="jarvis-launch-button mt-9 h-12 rounded-none px-6 text-sm font-semibold uppercase tracking-[0.14em]"
+					className="jarvis-launch-button mt-10 h-12 rounded-none px-6 text-sm font-semibold uppercase tracking-[0.14em]"
 				aria-label={
 					isLoading
 						? "Starting conversation with AI agent"
