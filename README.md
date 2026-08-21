@@ -19,7 +19,9 @@ bun run setup
 agora project env write server/.env.local
 ```
 
-Add the remaining server-only values to `server/.env.local`:
+At this point the basic managed voice agent can connect. To enable the custom
+GLM tool loop, Fish Audio voice, and Notion actions, add the corresponding
+optional server-only values to `server/.env.local`:
 
 ```bash
 LLM_API_KEY=...
@@ -62,12 +64,9 @@ The backend tests mock Agora, OpenAI, and Notion boundaries; no paid cloud call 
 Railway builds the root `Dockerfile`. Configure these variables on the backend service:
 
 - `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE`
-- `LLM_API_KEY`, `LLM_MODEL`, `LLM_BASE_URL`, and optional `LLM_THINKING_TYPE`, `LLM_MAX_HISTORY`, and `LLM_MAX_TOKENS`
-- `CUSTOM_LLM_PROXY_KEY`
-- `CUSTOM_LLM_URL=https://<railway-domain>/chat/completions`
-- `FISH_AUDIO_API_KEY`
-- `FISH_AUDIO_REFERENCE_ID=7c1a7dc37829497593ab4db29eed387c`
-- `FISH_AUDIO_BACKEND=s2.1-pro`
+- optional custom tool loop: `LLM_API_KEY`, `LLM_MODEL`, `LLM_BASE_URL`, `CUSTOM_LLM_PROXY_KEY`, `CUSTOM_LLM_URL=https://<railway-domain>/chat/completions`, `LLM_THINKING_TYPE`, `LLM_MAX_HISTORY`, and `LLM_MAX_TOKENS`
+- optional `FISH_AUDIO_API_KEY`, `FISH_AUDIO_REFERENCE_ID`, and
+  `FISH_AUDIO_BACKEND`; without them the agent uses Agora-managed MiniMax TTS
 - `NOTION_API_KEY` and `NOTION_DATA_SOURCE_ID`
 - optional `NOTION_TITLE_PROPERTY` (default: `Name`)
 

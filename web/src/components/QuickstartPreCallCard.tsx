@@ -19,7 +19,7 @@ export function QuickstartPreCallCard({
 		<div className="jarvis-launch-grid mx-auto w-[min(94vw,68rem)] animate-fade-up text-left">
 			<div className="jarvis-launch-copy">
 				<div className="jarvis-eyebrow"><span /> JARVIS voice interface</div>
-				<p className="jarvis-serial">AGORA RTC · FISH AUDIO · CONNECTED TOOLS</p>
+				<p className="jarvis-serial">AGORA RTC · MANAGED VOICE · CONNECTED TOOLS</p>
 				<h1>Ask anything.<br /><em>Take action.</em></h1>
 				<p className="jarvis-intro">
 					Talk to JARVIS naturally. Ask a question, work through an idea, or have it take action with connected tools when needed.

@@ -17,7 +17,7 @@
 | Next build/run | `AGENT_BACKEND_URL`                                                    |
 | FastAPI        | `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`, `AGENT_GREETING`, `PORT`      |
 
-The task-agent path also keeps `LLM_API_KEY`, `NOTION_API_KEY`, `CUSTOM_LLM_PROXY_KEY`, and `FISH_AUDIO_API_KEY` in FastAPI only. The value placed in Agora's LLM `api_key` field is the separate proxy key, never the upstream OpenAI credential. Fish Audio receives its provider key only through Agora's server-side TTS configuration.
+The task-agent path also keeps `LLM_API_KEY`, `NOTION_API_KEY`, `CUSTOM_LLM_PROXY_KEY`, and optional `FISH_AUDIO_API_KEY` in FastAPI only. The value placed in Agora's LLM `api_key` field is the separate proxy key, never the upstream OpenAI credential. Fish Audio receives its provider key only through Agora's server-side TTS configuration; without it the server selects managed MiniMax TTS.
 
 Mark `AGORA_APP_CERTIFICATE` as a sensitive secret in whichever host runs the Python service. The certificate value never appears in `web/`.
 

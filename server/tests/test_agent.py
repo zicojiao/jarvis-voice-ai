@@ -77,6 +77,82 @@ def test_start_wires_managed_openai_and_returns_shape(fake_env, monkeypatch):
     assert captured["remote_uids"] == ["222"]
 
 
+def test_start_falls_back_to_managed_minimax_without_fish_key(fake_env, monkeypatch):
+    monkeypatch.delenv("FISH_AUDIO_API_KEY", raising=False)
+    agent = _fresh_agent_module()
+    captured = {}
+
+    class FakeSession:
+        async def start(self):
+            return "managed-tts-agent-id"
+
+    def fake_create_async_session(self, **kwargs):
+        captured["tts"] = self.tts
+        return FakeSession()
+
+    from agora_agent.agentkit import Agent as AgoraAgent
+
+    monkeypatch.setattr(AgoraAgent, "create_async_session", fake_create_async_session)
+    asyncio.run(agent.Agent().start(channel_name="ch", agent_uid=111, user_uid=222))
+
+    assert captured["tts"] == {
+        "vendor": "minimax",
+        "params": {"voice_setting": {"voice_id": "English_captivating_female1"}},
+        "_minimax_preset_model": "speech_2_6_turbo",
+    }
+
+
+def test_start_prunes_remote_stopped_sessions_before_limit(fake_env, monkeypatch):
+    agent = _fresh_agent_module()
+
+    class ExistingSession:
+        async def get_info(self):
+            return type("Info", (), {"status": "STOPPED"})()
+
+    class NewSession:
+        async def start(self):
+            return "replacement-agent-id"
+
+    from agora_agent.agentkit import Agent as AgoraAgent
+
+    monkeypatch.setattr(
+        AgoraAgent,
+        "create_async_session",
+        lambda self, **kwargs: NewSession(),
+    )
+    instance = agent.Agent()
+    instance._sessions = {
+        "stale-1": ExistingSession(),
+        "stale-2": ExistingSession(),
+        "stale-3": ExistingSession(),
+    }
+
+    result = asyncio.run(
+        instance.start(channel_name="ch", agent_uid=111, user_uid=222)
+    )
+
+    assert result["agent_id"] == "replacement-agent-id"
+    assert set(instance._sessions) == {"replacement-agent-id"}
+
+
+def test_start_keeps_remote_running_sessions_in_limit(fake_env):
+    agent = _fresh_agent_module()
+
+    class ExistingSession:
+        async def get_info(self):
+            return type("Info", (), {"status": "RUNNING"})()
+
+    instance = agent.Agent()
+    instance._sessions = {
+        "active-1": ExistingSession(),
+        "active-2": ExistingSession(),
+        "active-3": ExistingSession(),
+    }
+
+    with pytest.raises(RuntimeError, match="active conversation limit"):
+        asyncio.run(instance.start(channel_name="ch", agent_uid=111, user_uid=222))
+
+
 def test_start_wires_custom_llm_without_exposing_upstream_key(fake_env, monkeypatch):
     monkeypatch.setenv("CUSTOM_LLM_URL", "https://backend.example/chat/completions")
     monkeypatch.setenv("CUSTOM_LLM_PROXY_KEY", "proxy-secret")

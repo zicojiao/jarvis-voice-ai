@@ -16,23 +16,22 @@
          │      │ RTM data                                                   │ HTTPS
          │ RTC  │                                                            ▼
          ▼      ▼                                                Agora Conversational AI
-   Agora media + RTM cloud                                       (managed STT + custom GLM + Fish Audio TTS)
+   Agora media + RTM cloud                                       (managed STT/LLM/TTS or optional custom providers)
 ```
 
 ## Live Session Lifecycle
 
 1. `LandingPage` calls `getConfig()` → `GET /api/get_config` → FastAPI returns `data: { app_id, token, uid, channel_name, agent_uid }`.
-2. In parallel:
-   - `startAgent(channel_name, Number(agent_uid), Number(uid))` → `POST /api/startAgent` → FastAPI starts the managed agent.
-   - `new AgoraRTM.RTM(appId, uid).login({ token })` → `subscribe(channel_name)`.
-3. `ConversationComponent` mounts inside a dynamic `AgoraRTCProvider` (RTC client in `useRef` for StrictMode safety) and:
+2. `startAgent(channel_name, Number(agent_uid), Number(uid))` → `POST /api/startAgent` → FastAPI starts the managed agent.
+3. After the agent start succeeds, `new AgoraRTM.RTM(appId, uid).login({ token })` → `subscribe(channel_name)`. If RTM setup fails, the browser stops the new agent and logs out the partial RTM client before showing a retryable error.
+4. `ConversationComponent` mounts inside a dynamic `AgoraRTCProvider` (RTC client in `useRef` for StrictMode safety) and:
    - `useJoin` joins RTC.
    - `useLocalMicrophoneTrack` + `usePublish` start mic publishing.
    - `AgoraVoiceAI.init({ rtcEngine, rtmConfig: { rtmEngine: rtmClient } })` wires transcripts, state, metrics.
    - `subscribeMessage(channel_name)` opens the toolkit's RTM channel.
-4. The user can speak over the published RTC microphone or type in `TextMessageComposer`. Typed messages call `AgoraVoiceAI.sendText(agent_uid, payload)` and travel directly to the agent over RTM with interrupted priority.
-5. End: `stopAgent(agentId)` → `POST /api/stopAgent` → FastAPI stops the agent. `rtmClient.logout()` follows.
-6. Renewal: on RTC `token-privilege-will-expire`, the client fetches `getConfig()` twice (once for RTC uid, once for the stored `agoraData.uid`) and renews RTC + RTM separately.
+5. The user can speak over the published RTC microphone or type in `TextMessageComposer`. Typed messages call `AgoraVoiceAI.sendText(agent_uid, payload)` and travel directly to the agent over RTM with interrupted priority.
+6. End: `stopAgent(agentId)` → `POST /api/stopAgent` → FastAPI stops the agent. `rtmClient.logout()` follows.
+7. Renewal: on RTC `token-privilege-will-expire`, the client fetches `getConfig()` twice (once for RTC uid, once for the stored `agoraData.uid`) and renews RTC + RTM separately.
 
 ## How `/api/*` Reaches FastAPI
 
@@ -68,6 +67,7 @@ If `AGENT_BACKEND_URL` is unset/empty, **no rewrites register** — the client c
 `server/src/agent.py`:
 
 - `get_config` treats missing, zero, and negative UIDs as "generate a usable UID" before minting an RTC+RTM token.
+- `Agent.start` prunes remotely stopped/failed tracked sessions before enforcing `MAX_ACTIVE_SESSIONS`, so abandoned browser tabs do not permanently consume the local demo limit.
 - `Agent.start(channel_name, rtc_uid, user_uid)` uses the module-level `AsyncAgora` client, builds `AgoraAgent` from `agora-agents` (`agora_agent`), and creates an async session.
 - `Agent.stop(agent_id)` ends the session.
 
@@ -77,7 +77,7 @@ If `AGENT_BACKEND_URL` is unset/empty, **no rewrites register** — the client c
 | ----- | ------------ | -------------------------------------------------------------------------- |
 | STT   | `DeepgramSTT`| `model="nova-3"`, `language="en"`                                           |
 | LLM   | Custom OpenAI-compatible | Zhipu `glm-4.5-flash` through FastAPI, thinking disabled for latency |
-| TTS   | `FishAudioTTS` | `reference_id="7c1a7dc37829497593ab4db29eed387c"`, `backend="s2.1-pro"` |
+| TTS   | `MiniMaxTTS` / `FishAudioTTS` | Managed MiniMax by default; Fish Audio when `FISH_AUDIO_API_KEY` is configured. |
 | VAD   | Agora        | Tunable `turn_detection` dict with start/end mode and timing thresholds    |
 
 Agent parameters: `data_channel="rtm"`, `enable_error_message=True`, `enable_metrics=True`. Advanced features: `{"enable_rtm": True, "enable_tools": True}`. Session options: `enable_string_uid=False`, `idle_timeout=30`, `expires_in=3600`.

@@ -25,7 +25,7 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - Backend: Python FastAPI in `server`
 - Web API facade: Next rewrites in `web/next.config.ts`
 - Auth: Token007 generated from `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE`
-- Default agent config: managed Deepgram STT, OpenAI LLM, and Fish Audio TTS
+- Default agent config: managed Deepgram STT, OpenAI LLM, and MiniMax TTS; Fish Audio is enabled when its key is configured
 
 ## Supported Modes
 
@@ -68,7 +68,7 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - Keep RTC client creation StrictMode-safe.
 - Keep transcript speaker mapping based on actual UIDs, not heuristics.
 - Keep managed-provider defaults unless a change intentionally adds a custom provider path.
-- Keep OpenAI, Notion, and Fish Audio credentials server-only. Agora receives only the provider-specific credentials required by its server-side pipeline.
+- Keep OpenAI, Notion, and optional Fish Audio credentials server-only. Agora receives only the provider-specific credentials required by its server-side pipeline.
 - Preserve `create_notion_task` idempotency so streamed tool retries cannot create duplicate pages.
 
 ## Working Rules

@@ -68,6 +68,7 @@ def test_health_and_recent_tasks_do_not_expose_secrets(client):
     assert body["services"]["tts"] == {
         "configured": True,
         "vendor": "fishaudio",
+        "managed": False,
         "reference_id": "7c1a7dc37829497593ab4db29eed387c",
         "backend": "s2.1-pro",
     }
@@ -77,6 +78,19 @@ def test_health_and_recent_tasks_do_not_expose_secrets(client):
     assert tasks.status_code == 200
     assert tasks.json()["data"]["configured"] is False
     assert tasks.json()["data"]["tasks"] == []
+
+
+def test_health_reports_managed_tts_fallback(client, monkeypatch):
+    monkeypatch.delenv("FISH_AUDIO_API_KEY", raising=False)
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json()["services"]["tts"] == {
+        "configured": True,
+        "vendor": "minimax",
+        "managed": True,
+        "reference_id": None,
+        "backend": "speech_2_6_turbo",
+    }
 
 
 def test_value_error_maps_to_400(client, server_module):

@@ -55,6 +55,7 @@ The quickstart deliberately uses `generate_convo_ai_token` for both RTC and RTM 
 
 - `Agent.__init__` is the only place env vars are read. If `AGORA_APP_ID` is missing at import and the constructor raises, `agent` stays `None` and route handlers return `500`.
 - `Agent._sessions: Dict[str, Any]` holds active sessions keyed by `agent_id` across requests. `Agent.start` writes; `Agent.stop` pops. Treat `_sessions` as the source of truth for live sessions on this worker.
+- Before applying `MAX_ACTIVE_SESSIONS`, `Agent.start` queries Agora for each tracked session and removes remote `IDLE`, `STOPPED`, `FAILED`, and `404` entries. This is required because closing a browser tab can skip `/stopAgent`, while Agora later ends that session through `idle_timeout`.
 - Per-request data (validated body, query params) lives in pydantic models or local variables. Do not stash arbitrary request state on `Agent` — only cross-call session bookkeeping belongs there.
 - Reloading via `uvicorn --reload` re-runs `Agent()`. In production, the singleton lives for the life of the worker, so a process restart resets `_sessions`.
 

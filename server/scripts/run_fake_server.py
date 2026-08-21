@@ -27,6 +27,13 @@ class FakeAgent:
 
 
 def main():
+    # Preserve the smoke-test overrides because importing server loads the local
+    # dotenv file with override=True. The fake server must never use developer
+    # credentials or replace the randomized test port with PORT from that file.
+    test_env = {
+        key: os.environ.get(key)
+        for key in ("AGORA_APP_ID", "AGORA_APP_CERTIFICATE", "PORT")
+    }
     server_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     src_root = os.path.join(server_root, "src")
     if src_root not in sys.path:
@@ -34,6 +41,9 @@ def main():
 
     import server as server_module
 
+    for key, value in test_env.items():
+        if value is not None:
+            os.environ[key] = value
     server_module.agent = FakeAgent()
 
     port = int(os.getenv("PORT", "8000"))
